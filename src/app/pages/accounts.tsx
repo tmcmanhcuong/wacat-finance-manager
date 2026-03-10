@@ -1,8 +1,10 @@
-import { Wallet, Building2, Smartphone, PiggyBank, ArrowRightLeft, Plus, TrendingUp, TrendingDown, Edit2, Trash2, X } from 'lucide-react';
+import { Wallet, Building2, Smartphone, PiggyBank, ArrowRightLeft, Plus, TrendingUp, TrendingDown, Edit2, Trash2, X, Loader2 } from 'lucide-react';
 import { NeumorphicCard, NeumorphicButton, NeumorphicInput, NeumorphicSelect } from '../components/neumorphic-card';
-import { mockAccounts, getTotalBalance, formatCurrency, mockTransactions } from '../store';
+import { formatCurrency, getTotalBalance } from '../store';
+import { useAccounts } from '../../hooks/useAccounts';
+import { useTransactions } from '../../hooks/useTransactions';
 import { motion } from 'motion/react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { useState } from 'react';
 
 const iconMap: Record<string, any> = {
@@ -13,6 +15,11 @@ const iconMap: Record<string, any> = {
 };
 
 export function Accounts() {
+  // ── Supabase hooks ──
+  const { accounts, loading: accountsLoading, addAccount, deleteAccount, updateBalance } = useAccounts();
+  const { transactions, loading: txLoading, addTransaction } = useTransactions();
+
+  // ── UI state ──
   const [showForm, setShowForm] = useState(false);
   const [showTransferForm, setShowTransferForm] = useState(false);
   const [showManageForm, setShowManageForm] = useState(false);
@@ -20,56 +27,90 @@ export function Accounts() {
   const [newAccountBalance, setNewAccountBalance] = useState('');
   const [newAccountColor, setNewAccountColor] = useState('#FF6B6B');
   const [newAccountIcon, setNewAccountIcon] = useState('Wallet');
-  
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   // Transfer form state
   const [transferFromAccount, setTransferFromAccount] = useState('');
   const [transferToAccount, setTransferToAccount] = useState('');
   const [transferAmount, setTransferAmount] = useState('');
   const [transferNote, setTransferNote] = useState('');
-  
+
   // Manage form state
   const [editingAccountId, setEditingAccountId] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
-  
-  const totalBalance = getTotalBalance(mockAccounts);
-  
-  const chartData = mockAccounts.map(account => ({
+
+  const totalBalance = getTotalBalance(accounts);
+  const chartData = accounts.map(account => ({
     name: account.name,
     value: account.balance,
     color: account.color,
   }));
 
-  const handleSubmit = () => {
-    console.log('Account created:', { 
-      name: newAccountName,
-      balance: newAccountBalance,
-      color: newAccountColor,
-      icon: newAccountIcon
-    });
-    setShowForm(false);
-    setNewAccountName('');
-    setNewAccountBalance('');
-    setNewAccountColor('#FF6B6B');
-    setNewAccountIcon('Wallet');
+  const handleSubmit = async () => {
+    if (!newAccountName || !newAccountBalance) return;
+    setIsSubmitting(true);
+    try {
+      await addAccount({
+        name: newAccountName,
+        balance: Number(newAccountBalance),
+        color: newAccountColor,
+        icon: newAccountIcon,
+      });
+      setShowForm(false);
+      setNewAccountName('');
+      setNewAccountBalance('');
+      setNewAccountColor('#FF6B6B');
+      setNewAccountIcon('Wallet');
+    } catch (err) {
+      console.error('Failed to create account:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleTransferSubmit = () => {
-    console.log('Transfer:', {
-      from: transferFromAccount,
-      to: transferToAccount,
-      amount: transferAmount,
-      note: transferNote
-    });
-    setShowTransferForm(false);
-    setTransferFromAccount('');
-    setTransferToAccount('');
-    setTransferAmount('');
-    setTransferNote('');
+  const handleTransferSubmit = async () => {
+    if (!transferFromAccount || !transferToAccount || !transferAmount) return;
+    setIsSubmitting(true);
+    try {
+      const fromAcc = accounts.find(a => a.id === transferFromAccount);
+      const toAcc = accounts.find(a => a.id === transferToAccount);
+      const amount = Number(transferAmount);
+      if (!fromAcc || !toAcc) return;
+
+      // Create transfer transaction
+      await addTransaction({
+        type: 'transfer',
+        amount,
+        category: 'Other',
+        date: new Date().toISOString().split('T')[0],
+        fromAccountId: transferFromAccount,
+        toAccountId: transferToAccount,
+        description: transferNote || `Transfer: ${fromAcc.name} → ${toAcc.name}`,
+      });
+
+      // Update balances
+      await updateBalance(transferFromAccount, fromAcc.balance - amount);
+      await updateBalance(transferToAccount, toAcc.balance + amount);
+
+      setShowTransferForm(false);
+      setTransferFromAccount('');
+      setTransferToAccount('');
+      setTransferAmount('');
+      setTransferNote('');
+    } catch (err) {
+      console.error('Failed to transfer:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleDeleteAccount = (accountId: string) => {
-    console.log('Delete account:', accountId);
-    setDeleteConfirmId(null);
+  const handleDeleteAccount = async (accountId: string) => {
+    try {
+      await deleteAccount(accountId);
+      setDeleteConfirmId(null);
+    } catch (err) {
+      console.error('Failed to delete account:', err);
+    }
   };
 
   const accountColors = [
@@ -80,6 +121,17 @@ export function Accounts() {
     { name: 'Green', value: '#90EE90' },
     { name: 'Pink', value: '#FFB6C1' },
   ];
+
+  if (accountsLoading || txLoading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 size={40} className="text-[#6C63FF] animate-spin" />
+          <p className="text-[#8B92A0]">Loading accounts...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-[1600px] mx-auto">
@@ -99,7 +151,7 @@ export function Accounts() {
           >
             <NeumorphicCard className="p-6">
               <h3 className="text-[#3D4852] text-2xl mb-6">Add New Account</h3>
-              
+
               {/* Account Name */}
               <div className="mb-6">
                 <label className="block text-[#3D4852] mb-2">Account Name</label>
@@ -130,14 +182,13 @@ export function Accounts() {
                     <button
                       key={iconName}
                       onClick={() => setNewAccountIcon(iconName)}
-                      className={`h-16 rounded-2xl transition-all ${
-                        newAccountIcon === iconName
-                          ? 'bg-[#6C63FF] shadow-[4px_4px_8px_rgba(108,99,255,0.3)]'
-                          : 'bg-[#E0E5EC] shadow-[4px_4px_8px_rgba(163,177,198,0.6),-4px_-4px_8px_rgba(255,255,255,0.6)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.4),-2px_-2px_4px_rgba(255,255,255,0.4)]'
-                      }`}
+                      className={`h-16 rounded-2xl transition-all ${newAccountIcon === iconName
+                        ? 'bg-[#6C63FF] shadow-[4px_4px_8px_rgba(108,99,255,0.3)]'
+                        : 'bg-[#E0E5EC] shadow-[4px_4px_8px_rgba(163,177,198,0.6),-4px_-4px_8px_rgba(255,255,255,0.6)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.4),-2px_-2px_4px_rgba(255,255,255,0.4)]'
+                        }`}
                     >
-                      <IconComponent 
-                        size={28} 
+                      <IconComponent
+                        size={28}
                         className={newAccountIcon === iconName ? 'text-white' : 'text-[#3D4852]'}
                       />
                     </button>
@@ -153,11 +204,10 @@ export function Accounts() {
                     <button
                       key={color.value}
                       onClick={() => setNewAccountColor(color.value)}
-                      className={`w-full h-12 rounded-xl transition-all ${
-                        newAccountColor === color.value
-                          ? 'ring-4 ring-[#6C63FF] ring-offset-2 ring-offset-[#E0E5EC]'
-                          : 'shadow-[4px_4px_8px_rgba(163,177,198,0.6),-4px_-4px_8px_rgba(255,255,255,0.6)]'
-                      }`}
+                      className={`w-full h-12 rounded-xl transition-all ${newAccountColor === color.value
+                        ? 'ring-4 ring-[#6C63FF] ring-offset-2 ring-offset-[#E0E5EC]'
+                        : 'shadow-[4px_4px_8px_rgba(163,177,198,0.6),-4px_-4px_8px_rgba(255,255,255,0.6)]'
+                        }`}
                       style={{ backgroundColor: color.value }}
                     />
                   ))}
@@ -219,7 +269,7 @@ export function Accounts() {
           >
             <NeumorphicCard className="p-6">
               <h3 className="text-[#3D4852] text-2xl mb-6">Transfer Between Accounts</h3>
-              
+
               {/* From Account */}
               <div className="mb-6">
                 <label className="block text-[#3D4852] mb-2">From Account</label>
@@ -228,7 +278,7 @@ export function Accounts() {
                   onChange={(e) => setTransferFromAccount(e.target.value)}
                 >
                   <option value="">Select source account</option>
-                  {mockAccounts.map((account) => (
+                  {accounts.map((account) => (
                     <option key={account.id} value={account.id}>
                       {account.name} - {formatCurrency(account.balance)}
                     </option>
@@ -244,7 +294,7 @@ export function Accounts() {
                   onChange={(e) => setTransferToAccount(e.target.value)}
                 >
                   <option value="">Select destination account</option>
-                  {mockAccounts
+                  {accounts
                     .filter(acc => acc.id !== transferFromAccount)
                     .map((account) => (
                       <option key={account.id} value={account.id}>
@@ -282,8 +332,8 @@ export function Accounts() {
                   <p className="text-[#8B92A0] text-sm mb-3">Transfer Preview</p>
                   <div className="space-y-3">
                     {(() => {
-                      const fromAcc = mockAccounts.find(a => a.id === transferFromAccount);
-                      const toAcc = mockAccounts.find(a => a.id === transferToAccount);
+                      const fromAcc = accounts.find(a => a.id === transferFromAccount);
+                      const toAcc = accounts.find(a => a.id === transferToAccount);
                       const amount = Number(transferAmount);
                       return (
                         <>
@@ -360,7 +410,7 @@ export function Accounts() {
               </div>
 
               <div className="space-y-4">
-                {mockAccounts.map((account) => {
+                {accounts.map((account) => {
                   const Icon = iconMap[account.icon] || Wallet;
                   return (
                     <div
@@ -458,10 +508,10 @@ export function Accounts() {
 
       {/* Account Cards Grid */}
       <div className="grid grid-cols-4 gap-6 mb-8">
-        {mockAccounts.map((account, index) => {
+        {accounts.map((account, index) => {
           const Icon = iconMap[account.icon] || Wallet;
           const percentage = (account.balance / totalBalance) * 100;
-          
+
           return (
             <motion.div
               key={account.id}
@@ -576,11 +626,11 @@ export function Accounts() {
             <NeumorphicCard className="p-6">
               <h3 className="text-[#3D4852] text-xl mb-6">Recent Account Activity</h3>
               <div className="space-y-4">
-                {mockTransactions.slice(0, 6).map((transaction, index) => {
-                  const account = mockAccounts.find(a => a.id === transaction.accountId);
-                  const fromAccount = mockAccounts.find(a => a.id === transaction.fromAccountId);
-                  const toAccount = mockAccounts.find(a => a.id === transaction.toAccountId);
-                  
+                {transactions.slice(0, 6).map((transaction, index) => {
+                  const account = accounts.find(a => a.id === transaction.accountId);
+                  const fromAccount = accounts.find(a => a.id === transaction.fromAccountId);
+                  const toAccount = accounts.find(a => a.id === transaction.toAccountId);
+
                   return (
                     <div key={transaction.id} className="flex items-center justify-between py-3 border-b border-[#CDD2D9]/30 last:border-0">
                       <div className="flex items-center gap-4">
@@ -596,8 +646,8 @@ export function Accounts() {
                         <div>
                           <p className="text-[#3D4852] mb-1">{transaction.description}</p>
                           <p className="text-[#8B92A0] text-sm">
-                            {transaction.type === 'transfer' 
-                              ? `${fromAccount?.name} → ${toAccount?.name}` 
+                            {transaction.type === 'transfer'
+                              ? `${fromAccount?.name} → ${toAccount?.name}`
                               : account?.name
                             } • {new Date(transaction.date).toLocaleDateString()}
                           </p>

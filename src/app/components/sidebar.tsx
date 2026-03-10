@@ -1,6 +1,7 @@
 import { useNavigate, useLocation } from 'react-router';
-import { Home, ArrowLeftRight, CreditCard, Calendar, Grid3x3, Settings, Cat, FolderTree } from 'lucide-react';
+import { Home, ArrowLeftRight, CreditCard, Calendar, Grid3x3, Settings, Cat, FolderTree, LogOut } from 'lucide-react';
 import { motion } from 'motion/react';
+import { supabase } from '../../lib/supabase';
 
 export function Sidebar() {
   const navigate = useNavigate();
@@ -14,6 +15,11 @@ export function Sidebar() {
     { path: '/debts', icon: Calendar, label: 'Debts & Spaylater' },
     { path: '/subscriptions', icon: Grid3x3, label: 'Subscriptions' },
   ];
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate('/signin');
+  };
 
   return (
     <aside className="fixed left-0 top-0 h-screen w-72 bg-[#E0E5EC] shadow-[8px_0_16px_rgba(163,177,198,0.3)] z-50 flex flex-col">
@@ -36,7 +42,7 @@ export function Sidebar() {
           {navItems.map((item, index) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
-            
+
             return (
               <motion.button
                 key={item.path}
@@ -44,11 +50,10 @@ export function Sidebar() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.05 }}
                 onClick={() => navigate(item.path)}
-                className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl transition-all min-h-[56px] ${
-                  isActive
+                className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl transition-all min-h-[56px] ${isActive
                     ? 'shadow-[inset_6px_6px_12px_rgba(163,177,198,0.6),inset_-6px_-6px_12px_rgba(255,255,255,0.6)]'
                     : 'shadow-[4px_4px_8px_rgba(163,177,198,0.4),-4px_-4px_8px_rgba(255,255,255,0.4)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.3),-2px_-2px_4px_rgba(255,255,255,0.3)]'
-                }`}
+                  }`}
               >
                 <Icon
                   size={22}
@@ -65,11 +70,18 @@ export function Sidebar() {
         </div>
       </nav>
 
-      {/* Settings Button */}
-      <div className="p-4 border-t border-[#CDD2D9]/30">
+      {/* Footer Buttons */}
+      <div className="p-4 border-t border-[#CDD2D9]/30 space-y-2">
         <button className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl shadow-[4px_4px_8px_rgba(163,177,198,0.4),-4px_-4px_8px_rgba(255,255,255,0.4)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.3),-2px_-2px_4px_rgba(255,255,255,0.3)] transition-all min-h-[56px]">
           <Settings size={22} className="text-[#8B92A0]" />
           <span className="text-[#8B92A0]">Settings</span>
+        </button>
+        <button
+          onClick={handleSignOut}
+          className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl shadow-[4px_4px_8px_rgba(163,177,198,0.4),-4px_-4px_8px_rgba(255,255,255,0.4)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.3),-2px_-2px_4px_rgba(255,255,255,0.3)] transition-all min-h-[56px] group"
+        >
+          <LogOut size={22} className="text-[#8B92A0] group-hover:text-[#FF6B6B] transition-colors" />
+          <span className="text-[#8B92A0] group-hover:text-[#FF6B6B] transition-colors">Sign Out</span>
         </button>
       </div>
     </aside>

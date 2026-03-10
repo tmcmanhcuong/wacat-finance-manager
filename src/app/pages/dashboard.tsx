@@ -1,29 +1,58 @@
-import { useState } from 'react';
-import { Cat, Plus, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, DollarSign } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Cat, Plus, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, DollarSign, Loader2 } from 'lucide-react';
 import { NeumorphicCard, NeumorphicButton } from '../components/neumorphic-card';
-import { mockAccounts, mockTransactions, getTotalBalance, calculateStats, calculateByCategory, formatCurrency, mockCategories } from '../store';
+import { getTotalBalance, calculateStats, calculateByCategory, formatCurrency } from '../store';
+import { useAccounts } from '../../hooks/useAccounts';
+import { useTransactions } from '../../hooks/useTransactions';
+import { useCategories } from '../../hooks/useCategories';
 import { motion } from 'motion/react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 export function Dashboard() {
-  const [showTransactionModal, setShowTransactionModal] = useState(false);
-  const totalBalance = getTotalBalance(mockAccounts);
-  const stats = calculateStats(mockTransactions);
+  const { accounts, loading: accountsLoading } = useAccounts();
+  const { transactions, loading: txLoading } = useTransactions();
+  const { categories, loading: catLoading } = useCategories();
 
-  const incomeByCategory = calculateByCategory(mockTransactions, mockCategories, 'income');
-  const expenseByCategory = calculateByCategory(mockTransactions, mockCategories, 'expense');
+  const loading = accountsLoading || txLoading || catLoading;
 
-  // Chart data
-  const monthlyData = [
-    { name: 'Jan', income: 15000000, expense: 8000000 },
-    { name: 'Feb', income: 15000000, expense: 9500000 },
-    { name: 'Mar', income: 18000000, expense: 7200000 },
-  ];
+  const totalBalance = useMemo(() => getTotalBalance(accounts), [accounts]);
+  const stats = useMemo(() => calculateStats(transactions), [transactions]);
+  const incomeByCategory = useMemo(() => calculateByCategory(transactions, categories, 'income'), [transactions, categories]);
+  const expenseByCategory = useMemo(() => calculateByCategory(transactions, categories, 'expense'), [transactions, categories]);
+
+  // Build monthly chart data dynamically from real transactions
+  const monthlyData = useMemo(() => {
+    const months: Record<string, { name: string; income: number; expense: number }> = {};
+    transactions.forEach((t) => {
+      if (t.type === 'transfer') return;
+      const d = new Date(t.date);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const label = d.toLocaleString('en', { month: 'short' });
+      if (!months[key]) months[key] = { name: label, income: 0, expense: 0 };
+      if (t.type === 'income') months[key].income += t.amount;
+      else months[key].expense += t.amount;
+    });
+    return Object.entries(months)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([, v]) => v)
+      .slice(-6); // last 6 months
+  }, [transactions]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 size={40} className="text-[#6C63FF] animate-spin" />
+          <p className="text-[#8B92A0]">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-[1600px] mx-auto">
       {/* Header */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="flex items-center justify-between mb-8"
@@ -47,7 +76,7 @@ export function Dashboard() {
               <h2 className="text-5xl text-[#3D4852] mb-3">{formatCurrency(totalBalance)}</h2>
               <div className="flex items-center gap-2 text-[#4ECDC4]">
                 <ArrowUpRight size={20} />
-                <span>+12.5% from last month</span>
+                <span>{accounts.length} account{accounts.length !== 1 ? 's' : ''} connected</span>
               </div>
             </div>
             <div className="w-24 h-24 bg-[#E0E5EC] rounded-3xl shadow-[inset_8px_8px_16px_rgba(163,177,198,0.6),inset_-8px_-8px_16px_rgba(255,255,255,0.6)] flex items-center justify-center">
@@ -81,9 +110,7 @@ export function Dashboard() {
                     <p className="text-[#8B92A0] text-sm mb-3">{stat.label} Income</p>
                     <div className="flex items-center gap-2 mb-2">
                       <TrendingUp size={20} className="text-[#4ECDC4]" />
-                      <p className="text-2xl text-[#4ECDC4]">
-                        {formatCurrency(stat.data)}
-                      </p>
+                      <p className="text-2xl text-[#4ECDC4]">{formatCurrency(stat.data)}</p>
                     </div>
                     <p className="text-[#8B92A0] text-xs mt-auto">{stat.period}</p>
                   </div>
@@ -115,9 +142,7 @@ export function Dashboard() {
                     <p className="text-[#8B92A0] text-sm mb-3">{stat.label} Expense</p>
                     <div className="flex items-center gap-2 mb-2">
                       <TrendingDown size={20} className="text-[#FF6B6B]" />
-                      <p className="text-2xl text-[#FF6B6B]">
-                        {formatCurrency(stat.data)}
-                      </p>
+                      <p className="text-2xl text-[#FF6B6B]">{formatCurrency(stat.data)}</p>
                     </div>
                     <p className="text-[#8B92A0] text-xs mt-auto">{stat.period}</p>
                   </div>
@@ -130,7 +155,7 @@ export function Dashboard() {
 
       {/* Charts Row */}
       <div className="grid grid-cols-3 gap-6 mb-8">
-        {/* Income & Expense Chart */}
+        {/* Line Chart */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -152,47 +177,36 @@ export function Dashboard() {
               </div>
             </div>
             <div className="bg-[#E0E5EC] p-4 rounded-3xl shadow-[inset_6px_6px_12px_rgba(163,177,198,0.6),inset_-6px_-6px_12px_rgba(255,255,255,0.6)]">
-              <ResponsiveContainer width="100%" height={280}>
-                <LineChart data={monthlyData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(163,177,198,0.3)" />
-                  <XAxis dataKey="name" stroke="#8B92A0" />
-                  <YAxis stroke="#8B92A0" />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: '#E0E5EC', 
-                      border: 'none',
-                      borderRadius: '16px',
-                      boxShadow: '4px 4px 8px rgba(163,177,198,0.6), -4px -4px 8px rgba(255,255,255,0.6)'
-                    }}
-                  />
-                  <Line 
-                    type="monotone"
-                    dataKey="income" 
-                    stroke="#4ECDC4" 
-                    strokeWidth={3}
-                    dot={{ fill: '#4ECDC4', r: 5 }}
-                    activeDot={{ r: 7 }}
-                  />
-                  <Line 
-                    type="monotone"
-                    dataKey="expense" 
-                    stroke="#FF6B6B" 
-                    strokeWidth={3}
-                    dot={{ fill: '#FF6B6B', r: 5 }}
-                    activeDot={{ r: 7 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+              {monthlyData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={280}>
+                  <LineChart data={monthlyData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(163,177,198,0.3)" />
+                    <XAxis dataKey="name" stroke="#8B92A0" />
+                    <YAxis stroke="#8B92A0" tickFormatter={(v) => `${(v / 1000000).toFixed(0)}M`} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: '#E0E5EC',
+                        border: 'none',
+                        borderRadius: '16px',
+                        boxShadow: '4px 4px 8px rgba(163,177,198,0.6), -4px -4px 8px rgba(255,255,255,0.6)'
+                      }}
+                      formatter={(v: number) => formatCurrency(v)}
+                    />
+                    <Line type="monotone" dataKey="income" stroke="#4ECDC4" strokeWidth={3} dot={{ fill: '#4ECDC4', r: 5 }} activeDot={{ r: 7 }} />
+                    <Line type="monotone" dataKey="expense" stroke="#FF6B6B" strokeWidth={3} dot={{ fill: '#FF6B6B', r: 5 }} activeDot={{ r: 7 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-[280px] flex items-center justify-center">
+                  <p className="text-[#8B92A0] text-sm">No transaction data yet</p>
+                </div>
+              )}
             </div>
           </NeumorphicCard>
         </motion.div>
 
         {/* Income by Category */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
           <NeumorphicCard className="p-6">
             <h3 className="text-[#3D4852] text-xl mb-6">Income by Category</h3>
             {incomeByCategory.length > 0 ? (
@@ -200,14 +214,7 @@ export function Dashboard() {
                 <div className="bg-[#E0E5EC] p-4 rounded-3xl shadow-[inset_6px_6px_12px_rgba(163,177,198,0.6),inset_-6px_-6px_12px_rgba(255,255,255,0.6)]">
                   <ResponsiveContainer width="100%" height={200}>
                     <PieChart>
-                      <Pie
-                        data={incomeByCategory}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={50}
-                        outerRadius={80}
-                        dataKey="value"
-                      >
+                      <Pie data={incomeByCategory} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value">
                         {incomeByCategory.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
@@ -237,11 +244,7 @@ export function Dashboard() {
         </motion.div>
 
         {/* Expense by Category */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
           <NeumorphicCard className="p-6">
             <h3 className="text-[#3D4852] text-xl mb-6">Expense by Category</h3>
             {expenseByCategory.length > 0 ? (
@@ -249,14 +252,7 @@ export function Dashboard() {
                 <div className="bg-[#E0E5EC] p-4 rounded-3xl shadow-[inset_6px_6px_12px_rgba(163,177,198,0.6),inset_-6px_-6px_12px_rgba(255,255,255,0.6)]">
                   <ResponsiveContainer width="100%" height={200}>
                     <PieChart>
-                      <Pie
-                        data={expenseByCategory}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={50}
-                        outerRadius={80}
-                        dataKey="value"
-                      >
+                      <Pie data={expenseByCategory} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value">
                         {expenseByCategory.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
@@ -289,82 +285,86 @@ export function Dashboard() {
       {/* Bottom Section */}
       <div className="grid grid-cols-2 gap-6">
         {/* Recent Transactions */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
           <NeumorphicCard className="p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-[#3D4852] text-xl">Recent Transactions</h3>
               <button className="text-[#6C63FF] hover:underline">View All</button>
             </div>
             <div className="space-y-4">
-              {mockTransactions.slice(0, 5).map((transaction) => {
-                const account = mockAccounts.find(a => a.id === transaction.accountId);
-                return (
-                  <div key={transaction.id} className="flex items-center justify-between py-3 border-b border-[#CDD2D9]/30 last:border-0">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-[#E0E5EC] rounded-2xl shadow-[inset_4px_4px_8px_rgba(163,177,198,0.6),inset_-4px_-4px_8px_rgba(255,255,255,0.6)] flex items-center justify-center">
-                        {transaction.type === 'income' ? (
-                          <ArrowUpRight size={20} className="text-[#4ECDC4]" />
-                        ) : (
-                          <ArrowDownRight size={20} className="text-[#FF6B6B]" />
-                        )}
+              {transactions.length === 0 ? (
+                <div className="text-center py-8 text-[#8B92A0]">
+                  <DollarSign size={32} className="mx-auto mb-2 opacity-30" />
+                  <p>No transactions yet</p>
+                </div>
+              ) : (
+                transactions.slice(0, 5).map((transaction) => {
+                  const account = accounts.find(a => a.id === transaction.accountId);
+                  return (
+                    <div key={transaction.id} className="flex items-center justify-between py-3 border-b border-[#CDD2D9]/30 last:border-0">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-[#E0E5EC] rounded-2xl shadow-[inset_4px_4px_8px_rgba(163,177,198,0.6),inset_-4px_-4px_8px_rgba(255,255,255,0.6)] flex items-center justify-center">
+                          {transaction.type === 'income' ? (
+                            <ArrowUpRight size={20} className="text-[#4ECDC4]" />
+                          ) : (
+                            <ArrowDownRight size={20} className="text-[#FF6B6B]" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-[#3D4852]">{transaction.description}</p>
+                          <p className="text-[#8B92A0] text-sm">{account?.name} • {new Date(transaction.date).toLocaleDateString('vi-VN')}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-[#3D4852]">{transaction.description}</p>
-                        <p className="text-[#8B92A0] text-sm">{account?.name} • {new Date(transaction.date).toLocaleDateString()}</p>
-                      </div>
+                      <p className={`text-lg ${transaction.type === 'income' ? 'text-[#4ECDC4]' : 'text-[#FF6B6B]'}`}>
+                        {transaction.type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
+                      </p>
                     </div>
-                    <p className={`text-lg ${transaction.type === 'income' ? 'text-[#4ECDC4]' : 'text-[#FF6B6B]'}`}>
-                      {transaction.type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
-                    </p>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </div>
           </NeumorphicCard>
         </motion.div>
 
         {/* Accounts Overview */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
           <NeumorphicCard className="p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-[#3D4852] text-xl">Accounts Overview</h3>
               <button className="text-[#6C63FF] hover:underline">Manage</button>
             </div>
             <div className="space-y-4">
-              {mockAccounts.map((account) => {
-                const percentage = (account.balance / totalBalance) * 100;
-                return (
-                  <div key={account.id}>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-[#E0E5EC] rounded-xl shadow-[inset_3px_3px_6px_rgba(163,177,198,0.6),inset_-3px_-3px_6px_rgba(255,255,255,0.6)] flex items-center justify-center">
-                          <span className="text-lg">{account.icon === 'Wallet' ? '💰' : account.icon === 'Building2' ? '🏦' : account.icon === 'Smartphone' ? '📱' : '🐷'}</span>
+              {accounts.length === 0 ? (
+                <div className="text-center py-8 text-[#8B92A0]">
+                  <Plus size={32} className="mx-auto mb-2 opacity-30" />
+                  <p>No accounts yet</p>
+                </div>
+              ) : (
+                accounts.map((account) => {
+                  const percentage = totalBalance > 0 ? (account.balance / totalBalance) * 100 : 0;
+                  return (
+                    <div key={account.id}>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-[#E0E5EC] rounded-xl shadow-[inset_3px_3px_6px_rgba(163,177,198,0.6),inset_-3px_-3px_6px_rgba(255,255,255,0.6)] flex items-center justify-center">
+                            <span className="text-lg">
+                              {account.icon === 'Wallet' ? '💰' : account.icon === 'Building2' ? '🏦' : account.icon === 'Smartphone' ? '📱' : '🐷'}
+                            </span>
+                          </div>
+                          <span className="text-[#3D4852]">{account.name}</span>
                         </div>
-                        <span className="text-[#3D4852]">{account.name}</span>
+                        <span className="text-[#3D4852]">{formatCurrency(account.balance)}</span>
                       </div>
-                      <span className="text-[#3D4852]">{formatCurrency(account.balance)}</span>
+                      <div className="h-2 bg-[#E0E5EC] rounded-full shadow-[inset_2px_2px_4px_rgba(163,177,198,0.6),inset_-2px_-2px_4px_rgba(255,255,255,0.6)] overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-1000"
+                          style={{ width: `${percentage}%`, backgroundColor: account.color, boxShadow: '2px 2px 4px rgba(0,0,0,0.2)' }}
+                        />
+                      </div>
                     </div>
-                    <div className="h-2 bg-[#E0E5EC] rounded-full shadow-[inset_2px_2px_4px_rgba(163,177,198,0.6),inset_-2px_-2px_4px_rgba(255,255,255,0.6)] overflow-hidden">
-                      <div
-                        className="h-full rounded-full transition-all duration-1000"
-                        style={{ 
-                          width: `${percentage}%`,
-                          backgroundColor: account.color,
-                          boxShadow: '2px 2px 4px rgba(0,0,0,0.2)'
-                        }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </div>
           </NeumorphicCard>
         </motion.div>
