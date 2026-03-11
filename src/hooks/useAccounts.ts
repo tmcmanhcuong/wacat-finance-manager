@@ -13,8 +13,9 @@ export function useAccounts() {
         try {
             const data = await accountsService.getAll();
             setAccounts(data);
-        } catch (err: any) {
-            setError(err.message ?? 'Failed to load accounts');
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Failed to load accounts';
+            setError(errorMessage);
             console.error('[useAccounts] fetch error:', err);
         } finally {
             setLoading(false);
@@ -35,10 +36,10 @@ export function useAccounts() {
             const created = await accountsService.create(account);
             setAccounts(prev => prev.map(a => a.id === tempId ? created : a));
             return created;
-        } catch (err: any) {
+        } catch (err) {
             // Rollback on error
             setAccounts(prev => prev.filter(a => a.id !== tempId));
-            setError(err.message);
+            setError(err instanceof Error ? err.message : 'Unknown error');
             throw err;
         }
     };
@@ -51,10 +52,10 @@ export function useAccounts() {
             const updated = await accountsService.update(id, updates);
             setAccounts(prev => prev.map(a => a.id === id ? updated : a));
             return updated;
-        } catch (err: any) {
+        } catch (err) {
             // Rollback by refetching
             await fetchAccounts();
-            setError(err.message);
+            setError(err instanceof Error ? err.message : 'Unknown error');
             throw err;
         }
     };
@@ -65,9 +66,9 @@ export function useAccounts() {
 
         try {
             await accountsService.updateBalance(id, newBalance);
-        } catch (err: any) {
+        } catch (err) {
             await fetchAccounts();
-            setError(err.message);
+            setError(err instanceof Error ? err.message : 'Unknown error');
             throw err;
         }
     };
@@ -79,10 +80,10 @@ export function useAccounts() {
 
         try {
             await accountsService.delete(id);
-        } catch (err: any) {
+        } catch (err) {
             // Rollback
             setAccounts(prevAccounts);
-            setError(err.message);
+            setError(err instanceof Error ? err.message : 'Unknown error');
             throw err;
         }
     };

@@ -15,8 +15,9 @@ export function useDebts() {
         try {
             const data = await debtsService.getAll();
             setDebts(data);
-        } catch (err: any) {
-            setError(err.message ?? 'Failed to load debts');
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Failed to load debts';
+            setError(errorMessage);
             console.error('[useDebts] fetch error:', err);
         } finally {
             setLoading(false);
@@ -32,8 +33,8 @@ export function useDebts() {
             const created = await debtsService.create(debt);
             setDebts(prev => [...prev, created]);
             return created;
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Unknown error');
             throw err;
         }
     };
@@ -44,9 +45,9 @@ export function useDebts() {
 
         try {
             await debtsService.delete(id);
-        } catch (err: any) {
+        } catch (err) {
             setDebts(prevDebts);
-            setError(err.message);
+            setError(err instanceof Error ? err.message : 'Unknown error');
             throw err;
         }
     };
@@ -107,10 +108,9 @@ export function useDebts() {
                 };
             }));
 
-            console.log('✅ Marked as received:', { debtId, receiveAmount });
-        } catch (err: any) {
+        } catch (err) {
             await fetchDebts();
-            setError(err.message);
+            setError(err instanceof Error ? err.message : 'Unknown error');
             throw err;
         }
     };
@@ -171,10 +171,9 @@ export function useDebts() {
                 };
             }));
 
-            console.log('✅ Installment paid:', { debtId, payAmount });
-        } catch (err: any) {
+        } catch (err) {
             await fetchDebts();
-            setError(err.message);
+            setError(err instanceof Error ? err.message : 'Unknown error');
             throw err;
         }
     };

@@ -1,0 +1,178 @@
+schema: spec-driven
+
+context: |
+  # WaCat Finance Manager — Project Context
+
+  ## Project Overview
+  WaCat is a Personal Finance Management System (SPA) built with a
+  Neumorphism (Soft UI) design system using a Cool Grey monochromatic palette.
+  All AI-generated code, proposals, and tasks MUST conform to this context.
+
+  ## Tech Stack
+  - Framework: React 18.3.1 (TypeScript)
+  - Routing: React Router 7.13.0 (createBrowserRouter)
+  - Styling: Tailwind CSS 4.1.12 (utility-first, NO inline styles for design tokens)
+  - Animation: Motion (Framer Motion) 12.23.24 — imported from "motion/react"
+  - Icons: Lucide React 0.487.0 — ONLY Lucide, never emoji or other icon libs
+  - Charts: Recharts 2.15.2
+  - Build Tool: Vite 6.3.5
+
+  ## Project Structure
+  src/
+    app/
+      App.tsx              # Root — only exports default App with <RouterProvider>
+      routes.ts            # createBrowserRouter config
+      store.ts             # Mock data arrays + utility functions (formatCurrency, etc.)
+      types.ts             # All TypeScript interfaces
+      components/
+        sidebar.tsx        # Fixed left nav (w-72)
+        neumorphic-card.tsx # NeumorphicCard | NeumorphicButton | NeumorphicInput | NeumorphicSelect
+        ui/                # (optional) Shadcn UI components
+      pages/
+        root.tsx           # Layout: flex, Sidebar + <Outlet />, main ml-72 p-12
+        dashboard.tsx
+        transactions.tsx
+        accounts.tsx
+        categories.tsx
+        debts.tsx
+        subscriptions.tsx
+    styles/
+      theme.css            # CSS variables & design tokens
+      fonts.css            # Google Fonts (Plus Jakarta Sans, DM Sans)
+      index.css            # Global resets
+      tailwind.css         # Tailwind imports
+
+  ## Design System — Neumorphism (Soft UI)
+  Background: #E0E5EC (Cool Grey) — ALWAYS used as the page/component background.
+
+  ### Color Palette
+  --background:        #E0E5EC   (main background)
+  --foreground:        #3D4852   (primary text)
+  --primary:           #6C63FF   (purple accent / CTA)
+  --muted-foreground:  #8B92A0   (secondary / placeholder text)
+  --success:           #4ECDC4   (teal — income, positive)
+  --destructive:       #FF6B6B   (red — expense, negative)
+  --warning:           #FFC75F   (orange — warnings)
+  Chart colors: #6C63FF, #4ECDC4, #FFB6B9, #FFC75F, #95E1D3
+
+  ### Typography
+  Headers (h1–h6): "Plus Jakarta Sans", sans-serif
+  Body / Inputs:   "DM Sans", sans-serif
+  Weights: 500 (headers, labels, buttons) | 400 (body, inputs)
+  Sizes: h1=2xl, h2=xl, h3=lg, h4=base, body=base
+
+  ### Neumorphism Shadows (Tailwind arbitrary values)
+  Extruded (raised):  shadow-[8px_8px_16px_rgba(163,177,198,0.6),-8px_-8px_16px_rgba(255,255,255,0.6)]
+  Inset (pressed):    shadow-[inset_6px_6px_12px_rgba(163,177,198,0.6),inset_-6px_-6px_12px_rgba(255,255,255,0.6)]
+  Flat (subtle):      shadow-[4px_4px_8px_rgba(163,177,198,0.4),-4px_-4px_8px_rgba(255,255,255,0.4)]
+
+  ### Border Radius
+  Cards:          rounded-[32px]
+  Buttons/Inputs: rounded-2xl (16px)
+  Icons:          rounded-xl (12px)
+
+  ### Component Min-Heights (touch targets)
+  Buttons:    min-h-[44px]
+  Inputs:     min-h-[44px]
+  Nav items:  min-h-[56px]
+
+  ### Spacing Scale
+  gap-2 (8px) tight | gap-4 (16px) standard | gap-6 (24px) loose | gap-8 (32px) sections
+  Card padding: p-6 (24px) | Page padding: p-12 (48px)
+  Max content width: max-w-[1600px] mx-auto
+
+  ## Reusable Components
+
+  ### NeumorphicCard
+  Props: variant ("extruded" default | "inset" | "flat"), className, onClick, children
+  Use "inset" for data wells and charts, "extruded" for regular cards, "flat" for subtle elevation.
+
+  ### NeumorphicButton
+  Props: variant ("primary" purple | "secondary" grey default), size ("sm"|"md"|"lg"), disabled, onClick
+  Always min-h-[44px], rounded-2xl.
+
+  ### NeumorphicInput / NeumorphicSelect
+  Standard form fields with inset shadow, min-h-[44px], rounded-2xl.
+
+  ## Data Models (from types.ts)
+  Account:      { id, name, balance (VND), icon (Lucide name), color (hex) }
+  Transaction:  { id, type ("income"|"expense"|"transfer"), amount, category (id), date (ISO),
+                  accountId?, fromAccountId?, toAccountId?, description? }
+  Category:     { id, name, icon (Lucide name), type ("income"|"expense"), color (hex) }
+  Debt:         { id, type ("lent"|"borrowed"|"installments"), person, amount, totalAmount,
+                  dueDate?, description?, paymentHistory?: PaymentHistory[] }
+  Subscription: { id, name, amount, nextPaymentDate (ISO), icon, color, category }
+
+  Special auto-generated categories:
+    "debt-collection" (income, #4ECDC4) — used when marking debt as received
+    "debt-payment"    (expense, #FF6B6B) — used when paying installment
+    "transfer"        (special, #8B92A0) — internal transfers only
+
+  ## Currency & Dates
+  Currency: Vietnamese Dong (VND) — always use formatCurrency() from store.ts
+    → new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND", minimumFractionDigits: 0 })
+    → Output example: "1.250.000₫"
+  Dates: stored as ISO string "YYYY-MM-DD", displayed via toLocaleDateString("vi-VN") → "10/03/2026"
+
+  ## Business Logic Rules
+  1. Transfers do NOT count in Income/Expense statistics — always exclude type === "transfer".
+  2. Creating a transaction MUST update the related account balance:
+       income  → account.balance += amount
+       expense → account.balance -= amount
+       transfer → fromAccount.balance -= amount; toAccount.balance += amount
+  3. Debt "Mark as Received" → creates Income transaction (category: debt-collection) + updates debt.amount + adds to paymentHistory.
+  4. Debt "Pay Installment" → creates Expense transaction (category: debt-payment) + updates debt.amount + adds to paymentHistory.
+  5. Amount validations: must be > 0 and ≤ outstanding balance (for debt payments); check insufficient balance.
+  6. Monthly stats: filter transactions where date >= start of current month AND type !== "transfer".
+
+  ## Routing (React Router)
+  /                → Dashboard
+  /transactions    → Transactions
+  /accounts        → Accounts
+  /categories      → Categories
+  /debts           → Debts & Spaylater
+  /subscriptions   → Subscriptions
+
+  ## Coding Conventions
+  - File naming: kebab-case.tsx for components/pages; types.ts, store.ts (singular)
+  - Exports: named exports for all pages/components; default export ONLY for App.tsx
+  - Import order: (1) external libs → (2) lucide-react icons → (3) local components → (4) store & types
+  - State naming: showForm/isLoading/hasError for booleans; selectedX for selections; plain noun for form fields
+  - Event handlers: handleSubmit, handleDelete(id), handleEdit(item), handleInputChange(e)
+  - Conditional rendering: ternary for two branches; && for single; early return for complex guards
+  - TypeScript: use interfaces from types.ts; annotate complex states; let simple states be inferred
+
+  ## UI/UX Patterns
+  Modal: motion.div overlay (fixed inset-0, bg-black/30, backdrop-blur-sm, z-50) +
+         motion.div content (max-w-lg, scale 0.9→1, y 20→0). Close on backdrop click, stop propagation on content.
+  Empty state: inset NeumorphicCard, 48px centered icon (#8B92A0), two lines of muted text + CTA hint.
+  Progress bar: inset track on #E0E5EC, filled with #4ECDC4, rounded-full, transition-all.
+  Info boxes: bg-[color]/10 + border-2 border-[color]/30 with Info icon.
+  Validation: required fields marked with <span class="text-[#FF6B6B]">*</span>; inline error/success below field.
+  Animations: page entrance opacity 0→1, y 20→0; staggered list delay index*0.05; modal scale 0.9→1.
+
+  ## Best Practices Checklist
+  ✅ max-w-[1600px] mx-auto for content wrapper
+  ✅ formatCurrency() for all monetary values
+  ✅ Lucide icons only (Plus, Trash2, Edit, X, Calendar, TrendingUp, TrendingDown, ArrowLeftRight, Cat…)
+  ✅ 44px min touch targets for all interactive elements
+  ✅ Unique keys from IDs (never array index) in lists
+  ✅ Reset form state when modal closes
+  ✅ Preview changes in form when possible
+  ✅ Remove console.logs before finalizing production code
+
+rules:
+  proposal:
+    - Proposals must clearly state the affected pages and components.
+    - Always include a "Non-goals" section to scope the change.
+    - Reference existing neumorphic component variants (extruded/inset/flat) where applicable.
+    - Keep proposals concise — favor bullet points over paragraphs.
+    - State which data models (from types.ts) are involved.
+
+  tasks:
+    - Break tasks into atomic chunks of max 2 hours each.
+    - Each task must reference the exact file path(s) to be modified.
+    - Tasks that touch transaction logic must explicitly handle account balance updates and stat exclusions.
+    - UI tasks must specify the neumorphic shadow variant and border radius to use.
+    - Always include a "Validation" sub-task to verify the feature works end-to-end.
+    - Order tasks so each one is independently implementable (no hidden dependencies).

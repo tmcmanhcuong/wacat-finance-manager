@@ -79,7 +79,7 @@ export function SignIn() {
     };
 
     return (
-        <div className="min-h-screen bg-[#E0E5EC] flex items-center justify-center p-6">
+        <div className="min-h-screen bg-[#E0E5EC] dark:bg-[#252C3E] flex items-center justify-center p-6">
             {/* Background decorative elements */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 {/* Top-left blob */}
@@ -119,15 +119,15 @@ export function SignIn() {
                         <motion.div
                             whileHover={{ rotate: [0, -10, 10, 0] }}
                             transition={{ duration: 0.5 }}
-                            className="w-16 h-16 bg-[#E0E5EC] rounded-2xl shadow-[8px_8px_16px_rgba(163,177,198,0.6),-8px_-8px_16px_rgba(255,255,255,0.6)] flex items-center justify-center"
+                            className="w-16 h-16 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-2xl shadow-[8px_8px_16px_rgba(163,177,198,0.6),-8px_-8px_16px_rgba(255,255,255,0.6)] dark:shadow-[8px_8px_16px_rgba(14,18,28,0.9),-8px_-8px_16px_rgba(42,49,68,0.5)] flex items-center justify-center"
                         >
                             <Cat className="text-[#6C63FF]" size={36} />
                         </motion.div>
                         <div>
-                            <h1 className="text-[#3D4852] text-4xl font-semibold" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                            <h1 className="text-[#3D4852] dark:text-[#E2E8F0] text-4xl font-semibold" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
                                 WaCat
                             </h1>
-                            <p className="text-[#8B92A0] text-sm" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+                            <p className="text-[#8B92A0] dark:text-[#8892A0] text-sm" style={{ fontFamily: "'DM Sans', sans-serif" }}>
                                 Finance Manager
                             </p>
                         </div>
@@ -136,13 +136,13 @@ export function SignIn() {
                     {/* Tagline */}
                     <div>
                         <h2
-                            className="text-[#3D4852] text-3xl leading-snug mb-3"
+                            className="text-[#3D4852] dark:text-[#E2E8F0] text-3xl leading-snug mb-3"
                             style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                         >
                             Take control of your <br />
                             <span className="text-[#6C63FF]">financial life</span> 🐱
                         </h2>
-                        <p className="text-[#8B92A0] text-base leading-relaxed" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+                        <p className="text-[#8B92A0] dark:text-[#8892A0] text-base leading-relaxed" style={{ fontFamily: "'DM Sans', sans-serif" }}>
                             Track income, expenses, debts, and subscriptions — all in one beautiful place.
                         </p>
                     </div>
@@ -177,7 +177,7 @@ export function SignIn() {
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: 0.2 + index * 0.12 }}
-                                className="flex items-center gap-4 p-4 bg-[#E0E5EC] rounded-2xl shadow-[4px_4px_8px_rgba(163,177,198,0.4),-4px_-4px_8px_rgba(255,255,255,0.4)]"
+                                className="flex items-center gap-4 p-4 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-2xl shadow-[4px_4px_8px_rgba(163,177,198,0.4),-4px_-4px_8px_rgba(255,255,255,0.4)] dark:shadow-[4px_4px_8px_rgba(14,18,28,0.9),-4px_-4px_8px_rgba(42,49,68,0.5)]"
                             >
                                 <div
                                     className={`w-11 h-11 ${feature.bg} rounded-xl flex items-center justify-center flex-shrink-0`}
@@ -186,13 +186,13 @@ export function SignIn() {
                                 </div>
                                 <div>
                                     <p
-                                        className="text-[#3D4852] font-medium text-sm"
+                                        className="text-[#3D4852] dark:text-[#E2E8F0] font-medium text-sm"
                                         style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                                     >
                                         {feature.title}
                                     </p>
                                     <p
-                                        className="text-[#8B92A0] text-xs"
+                                        className="text-[#8B92A0] dark:text-[#8892A0] text-xs"
                                         style={{ fontFamily: "'DM Sans', sans-serif" }}
                                     >
                                         {feature.desc}
@@ -210,15 +210,15 @@ export function SignIn() {
                     transition={{ duration: 0.7, ease: 'easeOut', delay: 0.1 }}
                     className="w-full max-w-md"
                 >
-                    <div className="bg-[#E0E5EC] rounded-[32px] shadow-[8px_8px_16px_rgba(163,177,198,0.6),-8px_-8px_16px_rgba(255,255,255,0.6)] p-8">
+                    <div className="bg-[#E0E5EC] dark:bg-[#252C3E] rounded-[32px] shadow-[8px_8px_16px_rgba(163,177,198,0.6),-8px_-8px_16px_rgba(255,255,255,0.6)] dark:shadow-[8px_8px_16px_rgba(14,18,28,0.9),-8px_-8px_16px_rgba(42,49,68,0.5)] p-8">
 
                         {/* Mobile Logo (only shows on small screens) */}
                         <div className="flex lg:hidden items-center gap-3 mb-8">
-                            <div className="w-10 h-10 bg-[#E0E5EC] rounded-xl shadow-[6px_6px_12px_rgba(163,177,198,0.6),-6px_-6px_12px_rgba(255,255,255,0.6)] flex items-center justify-center">
+                            <div className="w-10 h-10 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-xl shadow-[6px_6px_12px_rgba(163,177,198,0.6),-6px_-6px_12px_rgba(255,255,255,0.6)] dark:shadow-[6px_6px_12px_rgba(14,18,28,0.9),-6px_-6px_12px_rgba(42,49,68,0.5)] flex items-center justify-center">
                                 <Cat className="text-[#6C63FF]" size={22} />
                             </div>
                             <span
-                                className="text-[#3D4852] text-2xl font-semibold"
+                                className="text-[#3D4852] dark:text-[#E2E8F0] text-2xl font-semibold"
                                 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                             >
                                 WaCat
@@ -228,13 +228,13 @@ export function SignIn() {
                         {/* Header */}
                         <div className="mb-8">
                             <h2
-                                className="text-[#3D4852] text-2xl mb-1"
+                                className="text-[#3D4852] dark:text-[#E2E8F0] text-2xl mb-1"
                                 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                             >
                                 {mode === 'signin' ? 'Welcome back! 👋' : 'Create account ✨'}
                             </h2>
                             <p
-                                className="text-[#8B92A0] text-sm"
+                                className="text-[#8B92A0] dark:text-[#8892A0] text-sm"
                                 style={{ fontFamily: "'DM Sans', sans-serif" }}
                             >
                                 {mode === 'signin'
@@ -244,7 +244,7 @@ export function SignIn() {
                         </div>
 
                         {/* Mode Toggle Tabs */}
-                        <div className="flex gap-2 p-1.5 bg-[#E0E5EC] rounded-2xl shadow-[inset_4px_4px_8px_rgba(163,177,198,0.5),inset_-4px_-4px_8px_rgba(255,255,255,0.5)] mb-8">
+                        <div className="flex gap-2 p-1.5 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-2xl shadow-[inset_4px_4px_8px_rgba(163,177,198,0.5),inset_-4px_-4px_8px_rgba(255,255,255,0.5)] dark:shadow-[inset_4px_4px_8px_rgba(14,18,28,0.9),inset_-4px_-4px_8px_rgba(42,49,68,0.5)] mb-8">
                             {(['signin', 'signup'] as const).map((m) => (
                                 <button
                                     key={m}
@@ -254,7 +254,7 @@ export function SignIn() {
                                     }}
                                     className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all ${mode === m
                                             ? 'bg-[#6C63FF] text-white shadow-[4px_4px_8px_rgba(108,99,255,0.3)]'
-                                            : 'text-[#8B92A0] hover:text-[#3D4852]'
+                                            : 'text-[#8B92A0] dark:text-[#8892A0] hover:text-[#3D4852] hover:dark:text-[#E2E8F0]'
                                         }`}
                                     style={{ fontFamily: "'DM Sans', sans-serif" }}
                                 >
@@ -285,14 +285,14 @@ export function SignIn() {
                             {/* Email */}
                             <div>
                                 <label
-                                    className="block text-[#3D4852] text-sm mb-2 font-medium"
+                                    className="block text-[#3D4852] dark:text-[#E2E8F0] text-sm mb-2 font-medium"
                                     style={{ fontFamily: "'DM Sans', sans-serif" }}
                                 >
                                     Email address
                                 </label>
                                 <div className="relative">
                                     <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                                        <Mail size={18} className="text-[#8B92A0]" />
+                                        <Mail size={18} className="text-[#8B92A0] dark:text-[#8892A0]" />
                                     </div>
                                     <NeumorphicInput
                                         type="email"
@@ -310,17 +310,17 @@ export function SignIn() {
                             {/* Password */}
                             <div>
                                 <label
-                                    className="block text-[#3D4852] text-sm mb-2 font-medium"
+                                    className="block text-[#3D4852] dark:text-[#E2E8F0] text-sm mb-2 font-medium"
                                     style={{ fontFamily: "'DM Sans', sans-serif" }}
                                 >
                                     Password
                                     {mode === 'signup' && (
-                                        <span className="text-[#8B92A0] font-normal ml-2 text-xs">(min. 6 characters)</span>
+                                        <span className="text-[#8B92A0] dark:text-[#8892A0] font-normal ml-2 text-xs">(min. 6 characters)</span>
                                     )}
                                 </label>
                                 <div className="relative">
                                     <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                                        <Lock size={18} className="text-[#8B92A0]" />
+                                        <Lock size={18} className="text-[#8B92A0] dark:text-[#8892A0]" />
                                     </div>
                                     <NeumorphicInput
                                         type={showPassword ? 'text' : 'password'}
@@ -335,7 +335,7 @@ export function SignIn() {
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword((v) => !v)}
-                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#8B92A0] hover:text-[#3D4852] transition-colors"
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#8B92A0] dark:text-[#8892A0] hover:text-[#3D4852] hover:dark:text-[#E2E8F0] transition-colors"
                                     >
                                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                     </button>
@@ -382,7 +382,7 @@ export function SignIn() {
                         {/* Divider */}
                         <div className="flex items-center gap-4 my-6">
                             <div className="flex-1 h-px bg-[#CDD2D9]/50" />
-                            <span className="text-[#8B92A0] text-xs" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+                            <span className="text-[#8B92A0] dark:text-[#8892A0] text-xs" style={{ fontFamily: "'DM Sans', sans-serif" }}>
                                 or continue with
                             </span>
                             <div className="flex-1 h-px bg-[#CDD2D9]/50" />
@@ -396,7 +396,7 @@ export function SignIn() {
                                     options: { redirectTo: window.location.origin },
                                 });
                             }}
-                            className="w-full flex items-center justify-center gap-3 py-3 px-6 bg-[#E0E5EC] rounded-2xl shadow-[6px_6px_12px_rgba(163,177,198,0.6),-6px_-6px_12px_rgba(255,255,255,0.6)] hover:shadow-[4px_4px_8px_rgba(163,177,198,0.4),-4px_-4px_8px_rgba(255,255,255,0.4)] transition-all min-h-[44px]"
+                            className="w-full flex items-center justify-center gap-3 py-3 px-6 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-2xl shadow-[6px_6px_12px_rgba(163,177,198,0.6),-6px_-6px_12px_rgba(255,255,255,0.6)] dark:shadow-[6px_6px_12px_rgba(14,18,28,0.9),-6px_-6px_12px_rgba(42,49,68,0.5)] hover:shadow-[4px_4px_8px_rgba(163,177,198,0.4),-4px_-4px_8px_rgba(255,255,255,0.4)] hover:dark:shadow-[4px_4px_8px_rgba(14,18,28,0.9),-4px_-4px_8px_rgba(42,49,68,0.5)] transition-all min-h-[44px]"
                         >
                             {/* Google icon */}
                             <svg width="18" height="18" viewBox="0 0 24 24">
@@ -406,7 +406,7 @@ export function SignIn() {
                                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                             </svg>
                             <span
-                                className="text-[#3D4852] text-sm font-medium"
+                                className="text-[#3D4852] dark:text-[#E2E8F0] text-sm font-medium"
                                 style={{ fontFamily: "'DM Sans', sans-serif" }}
                             >
                                 Continue with Google
@@ -415,7 +415,7 @@ export function SignIn() {
 
                         {/* Footer note */}
                         <p
-                            className="text-center text-[#8B92A0] text-xs mt-6"
+                            className="text-center text-[#8B92A0] dark:text-[#8892A0] text-xs mt-6"
                             style={{ fontFamily: "'DM Sans', sans-serif" }}
                         >
                             By continuing, you agree to our{' '}

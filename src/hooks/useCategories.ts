@@ -16,8 +16,9 @@ export function useCategories() {
         try {
             const data = await categoriesService.getAll();
             setCategories(data);
-        } catch (err: any) {
-            setError(err.message ?? 'Failed to load categories');
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Failed to load categories';
+            setError(errorMessage);
             console.error('[useCategories] fetch error:', err);
         } finally {
             setLoading(false);
@@ -37,9 +38,9 @@ export function useCategories() {
             const created = await categoriesService.create(category);
             setCategories(prev => prev.map(c => c.id === tempId ? created : c));
             return created;
-        } catch (err: any) {
+        } catch (err) {
             setCategories(prev => prev.filter(c => c.id !== tempId));
-            setError(err.message);
+            setError(err instanceof Error ? err.message : 'Unknown error');
             throw err;
         }
     };
@@ -51,9 +52,9 @@ export function useCategories() {
             const updated = await categoriesService.update(id, updates);
             setCategories(prev => prev.map(c => c.id === id ? updated : c));
             return updated;
-        } catch (err: any) {
+        } catch (err) {
             await fetchCategories();
-            setError(err.message);
+            setError(err instanceof Error ? err.message : 'Unknown error');
             throw err;
         }
     };
@@ -68,9 +69,9 @@ export function useCategories() {
 
         try {
             await categoriesService.delete(id);
-        } catch (err: any) {
+        } catch (err) {
             setCategories(prevCategories);
-            setError(err.message);
+            setError(err instanceof Error ? err.message : 'Unknown error');
             throw err;
         }
     };

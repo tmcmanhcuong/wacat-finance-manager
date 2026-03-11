@@ -13,8 +13,9 @@ export function useSubscriptions() {
         try {
             const data = await subscriptionsService.getAll();
             setSubscriptions(data);
-        } catch (err: any) {
-            setError(err.message ?? 'Failed to load subscriptions');
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Failed to load subscriptions';
+            setError(errorMessage);
             console.error('[useSubscriptions] fetch error:', err);
         } finally {
             setLoading(false);
@@ -34,9 +35,9 @@ export function useSubscriptions() {
             const created = await subscriptionsService.create(subscription);
             setSubscriptions(prev => prev.map(s => s.id === tempId ? created : s));
             return created;
-        } catch (err: any) {
+        } catch (err) {
             setSubscriptions(prev => prev.filter(s => s.id !== tempId));
-            setError(err.message);
+            setError(err instanceof Error ? err.message : 'Unknown error');
             throw err;
         }
     };
@@ -48,9 +49,9 @@ export function useSubscriptions() {
             const updated = await subscriptionsService.update(id, updates);
             setSubscriptions(prev => prev.map(s => s.id === id ? updated : s));
             return updated;
-        } catch (err: any) {
+        } catch (err) {
             await fetchSubscriptions();
-            setError(err.message);
+            setError(err instanceof Error ? err.message : 'Unknown error');
             throw err;
         }
     };
@@ -61,9 +62,9 @@ export function useSubscriptions() {
 
         try {
             await subscriptionsService.delete(id);
-        } catch (err: any) {
+        } catch (err) {
             setSubscriptions(prevSubs);
-            setError(err.message);
+            setError(err instanceof Error ? err.message : 'Unknown error');
             throw err;
         }
     };

@@ -182,7 +182,14 @@ export const getTotalBalance = (accounts: Account[]): number => {
 };
 
 // Calculate stats
-export const calculateStats = (transactions: Transaction[]) => {
+export const calculateStats = (
+  transactions: Transaction[]
+): {
+  daily: { income: number; expense: number; net: number };
+  weekly: { income: number; expense: number; net: number };
+  monthly: { income: number; expense: number; net: number };
+  yearly: { income: number; expense: number; net: number };
+} => {
   const now = new Date('2026-03-10');
   const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const weekStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -215,7 +222,11 @@ export const calculateStats = (transactions: Transaction[]) => {
 };
 
 // Calculate income/expense by category
-export const calculateByCategory = (transactions: Transaction[], categories: Category[], type: 'income' | 'expense') => {
+export const calculateByCategory = (
+  transactions: Transaction[],
+  categories: Category[],
+  type: 'income' | 'expense'
+): Array<{ id: string; name: string; value: number; color: string }> => {
   const categoryTotals = categories
     .filter(c => c.type === type)
     .map(category => {

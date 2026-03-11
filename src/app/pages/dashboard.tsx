@@ -1,12 +1,52 @@
-import { useState, useMemo } from 'react';
-import { Cat, Plus, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, DollarSign, Loader2 } from 'lucide-react';
-import { NeumorphicCard, NeumorphicButton } from '../components/neumorphic-card';
+import type React from 'react';
+import { useMemo } from 'react';
+import { Cat, Plus, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, ArrowRightLeft, DollarSign, Loader2, Wallet, Building2, Smartphone, PiggyBank, Sun, Moon, Monitor, type LucideIcon } from 'lucide-react';
+import { NeumorphicCard } from '../components/neumorphic-card';
+import { useThemeContext } from '../components/theme-provider';
 import { getTotalBalance, calculateStats, calculateByCategory, formatCurrency } from '../store';
 import { useAccounts } from '../../hooks/useAccounts';
 import { useTransactions } from '../../hooks/useTransactions';
 import { useCategories } from '../../hooks/useCategories';
 import { motion } from 'motion/react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+
+const iconMap: Record<string, LucideIcon> = {
+  Wallet,
+  Building2,
+  Smartphone,
+  PiggyBank,
+};
+
+function ThemeToggleButton() {
+  const { mode, setTheme } = useThemeContext();
+
+  const options: { value: 'light' | 'dark' | 'system'; icon: React.ReactNode; label: string }[] = [
+    { value: 'light', icon: <Sun size={16} />, label: 'Light' },
+    { value: 'system', icon: <Monitor size={16} />, label: 'System' },
+    { value: 'dark', icon: <Moon size={16} />, label: 'Dark' },
+  ];
+
+  return (
+    <div className="flex items-center gap-1 p-1.5 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-2xl shadow-[inset_3px_3px_6px_rgba(163,177,198,0.5),inset_-3px_-3px_6px_rgba(255,255,255,0.5)] dark:shadow-[inset_3px_3px_6px_rgba(14,18,28,0.8),inset_-3px_-3px_6px_rgba(42,49,68,0.5)]">
+      {options.map(opt => (
+        <button
+          key={opt.value}
+          title={opt.label}
+          onClick={() => setTheme(opt.value)}
+          className={[
+            'flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm transition-all duration-200',
+            mode === opt.value
+              ? 'bg-[#6C63FF] text-white shadow-[3px_3px_6px_rgba(108,99,255,0.35)]'
+              : 'text-[#8B92A0] dark:text-[#8892A0] hover:text-[#3D4852] dark:hover:text-[#E2E8F0]',
+          ].join(' ')}
+        >
+          {opt.icon}
+          <span className="hidden sm:inline">{opt.label}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
 
 export function Dashboard() {
   const { accounts, loading: accountsLoading } = useAccounts();
@@ -58,9 +98,12 @@ export function Dashboard() {
         className="flex items-center justify-between mb-8"
       >
         <div>
-          <h1 className="text-[#3D4852] text-3xl mb-2">Welcome back, Cat Lover 👋</h1>
+          <h1 className="text-[#3D4852] dark:text-[#E2E8F0] text-3xl mb-2">Welcome back, Cat Lover 👋</h1>
           <p className="text-[#8B92A0]">Here's your financial overview</p>
         </div>
+
+        {/* Theme Toggle */}
+        <ThemeToggleButton />
       </motion.div>
 
       {/* Total Balance Card */}
@@ -73,13 +116,13 @@ export function Dashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-[#8B92A0] mb-2">Total Balance</p>
-              <h2 className="text-5xl text-[#3D4852] mb-3">{formatCurrency(totalBalance)}</h2>
+              <h2 className="text-5xl text-[#3D4852] dark:text-[#E2E8F0] mb-3">{formatCurrency(totalBalance)}</h2>
               <div className="flex items-center gap-2 text-[#4ECDC4]">
                 <ArrowUpRight size={20} />
                 <span>{accounts.length} account{accounts.length !== 1 ? 's' : ''} connected</span>
               </div>
             </div>
-            <div className="w-24 h-24 bg-[#E0E5EC] rounded-3xl shadow-[inset_8px_8px_16px_rgba(163,177,198,0.6),inset_-8px_-8px_16px_rgba(255,255,255,0.6)] flex items-center justify-center">
+            <div className="w-24 h-24 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-3xl shadow-[inset_8px_8px_16px_rgba(163,177,198,0.6),inset_-8px_-8px_16px_rgba(255,255,255,0.6)] dark:shadow-[inset_8px_8px_16px_rgba(14,18,28,0.9),inset_-8px_-8px_16px_rgba(42,49,68,0.6)] flex items-center justify-center">
               <Cat className="text-[#6C63FF]" size={48} />
             </div>
           </div>
@@ -92,7 +135,7 @@ export function Dashboard() {
         <div>
           <div className="flex items-center gap-3 mb-4">
             <TrendingUp size={24} className="text-[#4ECDC4]" />
-            <h3 className="text-[#3D4852] text-xl">Income Statistics</h3>
+            <h3 className="text-[#3D4852] dark:text-[#E2E8F0] text-xl">Income Statistics</h3>
           </div>
           <div className="grid grid-cols-2 gap-6">
             {[
@@ -124,7 +167,7 @@ export function Dashboard() {
         <div>
           <div className="flex items-center gap-3 mb-4">
             <TrendingDown size={24} className="text-[#FF6B6B]" />
-            <h3 className="text-[#3D4852] text-xl">Expense Statistics</h3>
+            <h3 className="text-[#3D4852] dark:text-[#E2E8F0] text-xl">Expense Statistics</h3>
           </div>
           <div className="grid grid-cols-2 gap-6">
             {[
@@ -164,7 +207,7 @@ export function Dashboard() {
         >
           <NeumorphicCard className="p-6">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-[#3D4852] text-xl">Income & Expenses Trend</h3>
+              <h3 className="text-[#3D4852] dark:text-[#E2E8F0] text-xl">Income &amp; Expenses Trend</h3>
             </div>
             <div className="flex gap-4 mb-4">
               <div className="flex items-center gap-2">
@@ -176,7 +219,7 @@ export function Dashboard() {
                 <span className="text-[#8B92A0] text-sm">Expense</span>
               </div>
             </div>
-            <div className="bg-[#E0E5EC] p-4 rounded-3xl shadow-[inset_6px_6px_12px_rgba(163,177,198,0.6),inset_-6px_-6px_12px_rgba(255,255,255,0.6)]">
+            <div className="bg-[#E0E5EC] dark:bg-[#252C3E] p-4 rounded-3xl shadow-[inset_6px_6px_12px_rgba(163,177,198,0.6),inset_-6px_-6px_12px_rgba(255,255,255,0.6)] dark:shadow-[inset_6px_6px_12px_rgba(14,18,28,0.9),inset_-6px_-6px_12px_rgba(42,49,68,0.5)]">
               {monthlyData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={280}>
                   <LineChart data={monthlyData}>
@@ -208,10 +251,10 @@ export function Dashboard() {
         {/* Income by Category */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
           <NeumorphicCard className="p-6">
-            <h3 className="text-[#3D4852] text-xl mb-6">Income by Category</h3>
+            <h3 className="text-[#3D4852] dark:text-[#E2E8F0] text-xl mb-6">Income by Category</h3>
             {incomeByCategory.length > 0 ? (
               <>
-                <div className="bg-[#E0E5EC] p-4 rounded-3xl shadow-[inset_6px_6px_12px_rgba(163,177,198,0.6),inset_-6px_-6px_12px_rgba(255,255,255,0.6)]">
+                <div className="bg-[#E0E5EC] dark:bg-[#252C3E] p-4 rounded-3xl shadow-[inset_6px_6px_12px_rgba(163,177,198,0.6),inset_-6px_-6px_12px_rgba(255,255,255,0.6)] dark:shadow-[inset_6px_6px_12px_rgba(14,18,28,0.9),inset_-6px_-6px_12px_rgba(42,49,68,0.5)]">
                   <ResponsiveContainer width="100%" height={200}>
                     <PieChart>
                       <Pie data={incomeByCategory} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value">
@@ -229,7 +272,7 @@ export function Dashboard() {
                         <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color }}></div>
                         <span className="text-[#8B92A0] text-sm">{cat.name}</span>
                       </div>
-                      <span className="text-[#3D4852] text-sm">{formatCurrency(cat.value)}</span>
+                      <span className="text-[#3D4852] dark:text-[#E2E8F0] text-sm">{formatCurrency(cat.value)}</span>
                     </div>
                   ))}
                 </div>
@@ -246,10 +289,10 @@ export function Dashboard() {
         {/* Expense by Category */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
           <NeumorphicCard className="p-6">
-            <h3 className="text-[#3D4852] text-xl mb-6">Expense by Category</h3>
+            <h3 className="text-[#3D4852] dark:text-[#E2E8F0] text-xl mb-6">Expense by Category</h3>
             {expenseByCategory.length > 0 ? (
               <>
-                <div className="bg-[#E0E5EC] p-4 rounded-3xl shadow-[inset_6px_6px_12px_rgba(163,177,198,0.6),inset_-6px_-6px_12px_rgba(255,255,255,0.6)]">
+                <div className="bg-[#E0E5EC] dark:bg-[#252C3E] p-4 rounded-3xl shadow-[inset_6px_6px_12px_rgba(163,177,198,0.6),inset_-6px_-6px_12px_rgba(255,255,255,0.6)] dark:shadow-[inset_6px_6px_12px_rgba(14,18,28,0.9),inset_-6px_-6px_12px_rgba(42,49,68,0.5)]">
                   <ResponsiveContainer width="100%" height={200}>
                     <PieChart>
                       <Pie data={expenseByCategory} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value">
@@ -288,7 +331,7 @@ export function Dashboard() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
           <NeumorphicCard className="p-6">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-[#3D4852] text-xl">Recent Transactions</h3>
+              <h3 className="text-[#3D4852] dark:text-[#E2E8F0] text-xl">Recent Transactions</h3>
               <button className="text-[#6C63FF] hover:underline">View All</button>
             </div>
             <div className="space-y-4">
@@ -299,24 +342,49 @@ export function Dashboard() {
                 </div>
               ) : (
                 transactions.slice(0, 5).map((transaction) => {
-                  const account = accounts.find(a => a.id === transaction.accountId);
+                  const isTransfer = transaction.type === 'transfer';
+                  const isIncome = transaction.type === 'income';
+
+                  // Resolve account name: transfer dùng fromAccountId → toAccountId
+                  const account = isTransfer
+                    ? accounts.find(a => a.id === transaction.fromAccountId)
+                    : accounts.find(a => a.id === transaction.accountId);
+                  const toAccount = isTransfer
+                    ? accounts.find(a => a.id === transaction.toAccountId)
+                    : null;
+
+                  // Label mô tả nguồn account
+                  const accountLabel = isTransfer
+                    ? `${account?.name ?? '?'} → ${toAccount?.name ?? '?'}`
+                    : account?.name ?? '';
+
+                  // Màu và dấu số tiền
+                  const amountColor = isTransfer
+                    ? 'text-[#6C63FF]'
+                    : isIncome
+                    ? 'text-[#4ECDC4]'
+                    : 'text-[#FF6B6B]';
+                  const amountPrefix = isTransfer ? '' : isIncome ? '+' : '-';
+
                   return (
-                    <div key={transaction.id} className="flex items-center justify-between py-3 border-b border-[#CDD2D9]/30 last:border-0">
+                    <div key={transaction.id} className="flex items-center justify-between py-3 border-b border-[#CDD2D9]/30 dark:border-[#2A3144]/30 last:border-0">
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-[#E0E5EC] rounded-2xl shadow-[inset_4px_4px_8px_rgba(163,177,198,0.6),inset_-4px_-4px_8px_rgba(255,255,255,0.6)] flex items-center justify-center">
-                          {transaction.type === 'income' ? (
+                        <div className="w-12 h-12 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-2xl shadow-[inset_4px_4px_8px_rgba(163,177,198,0.6),inset_-4px_-4px_8px_rgba(255,255,255,0.6)] dark:shadow-[inset_4px_4px_8px_rgba(14,18,28,0.9),inset_-4px_-4px_8px_rgba(42,49,68,0.5)] flex items-center justify-center">
+                          {isTransfer ? (
+                            <ArrowRightLeft size={20} className="text-[#6C63FF]" />
+                          ) : isIncome ? (
                             <ArrowUpRight size={20} className="text-[#4ECDC4]" />
                           ) : (
                             <ArrowDownRight size={20} className="text-[#FF6B6B]" />
                           )}
                         </div>
                         <div>
-                          <p className="text-[#3D4852]">{transaction.description}</p>
-                          <p className="text-[#8B92A0] text-sm">{account?.name} • {new Date(transaction.date).toLocaleDateString('vi-VN')}</p>
+                          <p className="text-[#3D4852] dark:text-[#E2E8F0]">{transaction.description}</p>
+                          <p className="text-[#8B92A0] text-sm">{accountLabel} • {new Date(transaction.date).toLocaleDateString('vi-VN')}</p>
                         </div>
                       </div>
-                      <p className={`text-lg ${transaction.type === 'income' ? 'text-[#4ECDC4]' : 'text-[#FF6B6B]'}`}>
-                        {transaction.type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
+                      <p className={`text-lg ${amountColor}`}>
+                        {amountPrefix}{formatCurrency(transaction.amount)}
                       </p>
                     </div>
                   );
@@ -330,7 +398,7 @@ export function Dashboard() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
           <NeumorphicCard className="p-6">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-[#3D4852] text-xl">Accounts Overview</h3>
+              <h3 className="text-[#3D4852] dark:text-[#E2E8F0] text-xl">Accounts Overview</h3>
               <button className="text-[#6C63FF] hover:underline">Manage</button>
             </div>
             <div className="space-y-4">
@@ -346,16 +414,17 @@ export function Dashboard() {
                     <div key={account.id}>
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-[#E0E5EC] rounded-xl shadow-[inset_3px_3px_6px_rgba(163,177,198,0.6),inset_-3px_-3px_6px_rgba(255,255,255,0.6)] flex items-center justify-center">
-                            <span className="text-lg">
-                              {account.icon === 'Wallet' ? '💰' : account.icon === 'Building2' ? '🏦' : account.icon === 'Smartphone' ? '📱' : '🐷'}
-                            </span>
+                          <div className="w-10 h-10 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-xl shadow-[inset_3px_3px_6px_rgba(163,177,198,0.6),inset_-3px_-3px_6px_rgba(255,255,255,0.6)] dark:shadow-[inset_3px_3px_6px_rgba(14,18,28,0.9),inset_-3px_-3px_6px_rgba(42,49,68,0.5)] flex items-center justify-center">
+                            {(() => {
+                              const Icon = iconMap[account.icon] ?? Wallet;
+                              return <Icon size={20} style={{ color: account.color }} />;
+                            })()}
                           </div>
-                          <span className="text-[#3D4852]">{account.name}</span>
+                          <span className="text-[#3D4852] dark:text-[#E2E8F0]">{account.name}</span>
                         </div>
-                        <span className="text-[#3D4852]">{formatCurrency(account.balance)}</span>
+                        <span className="text-[#3D4852] dark:text-[#E2E8F0]">{formatCurrency(account.balance)}</span>
                       </div>
-                      <div className="h-2 bg-[#E0E5EC] rounded-full shadow-[inset_2px_2px_4px_rgba(163,177,198,0.6),inset_-2px_-2px_4px_rgba(255,255,255,0.6)] overflow-hidden">
+                      <div className="h-2 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-full shadow-[inset_2px_2px_4px_rgba(163,177,198,0.6),inset_-2px_-2px_4px_rgba(255,255,255,0.6)] dark:shadow-[inset_2px_2px_4px_rgba(14,18,28,0.9),inset_-2px_-2px_4px_rgba(42,49,68,0.5)] overflow-hidden">
                         <div
                           className="h-full rounded-full transition-all duration-1000"
                           style={{ width: `${percentage}%`, backgroundColor: account.color, boxShadow: '2px 2px 4px rgba(0,0,0,0.2)' }}

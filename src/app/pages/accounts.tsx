@@ -1,4 +1,4 @@
-import { Wallet, Building2, Smartphone, PiggyBank, ArrowRightLeft, Plus, TrendingUp, TrendingDown, Edit2, Trash2, X, Loader2 } from 'lucide-react';
+import { Wallet, Building2, Smartphone, PiggyBank, ArrowRightLeft, Plus, TrendingUp, TrendingDown, Edit2, Trash2, X, Loader2, type LucideIcon } from 'lucide-react';
 import { NeumorphicCard, NeumorphicButton, NeumorphicInput, NeumorphicSelect } from '../components/neumorphic-card';
 import { formatCurrency, getTotalBalance } from '../store';
 import { useAccounts } from '../../hooks/useAccounts';
@@ -7,7 +7,7 @@ import { motion } from 'motion/react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { useState } from 'react';
 
-const iconMap: Record<string, any> = {
+const iconMap: Record<string, LucideIcon> = {
   Wallet,
   Building2,
   Smartphone,
@@ -27,7 +27,7 @@ export function Accounts() {
   const [newAccountBalance, setNewAccountBalance] = useState('');
   const [newAccountColor, setNewAccountColor] = useState('#FF6B6B');
   const [newAccountIcon, setNewAccountIcon] = useState('Wallet');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Transfer form state
   const [transferFromAccount, setTransferFromAccount] = useState('');
@@ -36,7 +36,7 @@ export function Accounts() {
   const [transferNote, setTransferNote] = useState('');
 
   // Manage form state
-  const [editingAccountId, setEditingAccountId] = useState<string | null>(null);
+  // const [editingAccountId, setEditingAccountId] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   const totalBalance = getTotalBalance(accounts);
@@ -48,7 +48,6 @@ export function Accounts() {
 
   const handleSubmit = async () => {
     if (!newAccountName || !newAccountBalance) return;
-    setIsSubmitting(true);
     try {
       await addAccount({
         name: newAccountName,
@@ -63,14 +62,11 @@ export function Accounts() {
       setNewAccountIcon('Wallet');
     } catch (err) {
       console.error('Failed to create account:', err);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   const handleTransferSubmit = async () => {
     if (!transferFromAccount || !transferToAccount || !transferAmount) return;
-    setIsSubmitting(true);
     try {
       const fromAcc = accounts.find(a => a.id === transferFromAccount);
       const toAcc = accounts.find(a => a.id === transferToAccount);
@@ -99,8 +95,6 @@ export function Accounts() {
       setTransferNote('');
     } catch (err) {
       console.error('Failed to transfer:', err);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -127,7 +121,7 @@ export function Accounts() {
       <div className="flex items-center justify-center h-96">
         <div className="flex flex-col items-center gap-4">
           <Loader2 size={40} className="text-[#6C63FF] animate-spin" />
-          <p className="text-[#8B92A0]">Loading accounts...</p>
+          <p className="text-[#8B92A0] dark:text-[#8892A0]">Loading accounts...</p>
         </div>
       </div>
     );
@@ -150,11 +144,11 @@ export function Accounts() {
             className="max-w-md w-full mx-4"
           >
             <NeumorphicCard className="p-6">
-              <h3 className="text-[#3D4852] text-2xl mb-6">Add New Account</h3>
+              <h3 className="text-[#3D4852] dark:text-[#E2E8F0] text-2xl mb-6">Add New Account</h3>
 
               {/* Account Name */}
               <div className="mb-6">
-                <label className="block text-[#3D4852] mb-2">Account Name</label>
+                <label className="block text-[#3D4852] dark:text-[#E2E8F0] mb-2">Account Name</label>
                 <NeumorphicInput
                   type="text"
                   placeholder="Cash, MB Bank, Momo..."
@@ -165,7 +159,7 @@ export function Accounts() {
 
               {/* Initial Balance */}
               <div className="mb-6">
-                <label className="block text-[#3D4852] mb-2">Initial Balance (VND)</label>
+                <label className="block text-[#3D4852] dark:text-[#E2E8F0] mb-2">Initial Balance (VND)</label>
                 <NeumorphicInput
                   type="number"
                   placeholder="0"
@@ -176,7 +170,7 @@ export function Accounts() {
 
               {/* Icon Selection */}
               <div className="mb-6">
-                <label className="block text-[#3D4852] mb-3">Select Icon</label>
+                <label className="block text-[#3D4852] dark:text-[#E2E8F0] mb-3">Select Icon</label>
                 <div className="grid grid-cols-4 gap-3">
                   {Object.entries(iconMap).map(([iconName, IconComponent]) => (
                     <button
@@ -184,12 +178,12 @@ export function Accounts() {
                       onClick={() => setNewAccountIcon(iconName)}
                       className={`h-16 rounded-2xl transition-all ${newAccountIcon === iconName
                         ? 'bg-[#6C63FF] shadow-[4px_4px_8px_rgba(108,99,255,0.3)]'
-                        : 'bg-[#E0E5EC] shadow-[4px_4px_8px_rgba(163,177,198,0.6),-4px_-4px_8px_rgba(255,255,255,0.6)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.4),-2px_-2px_4px_rgba(255,255,255,0.4)]'
+                        : 'bg-[#E0E5EC] dark:bg-[#252C3E] shadow-[4px_4px_8px_rgba(163,177,198,0.6),-4px_-4px_8px_rgba(255,255,255,0.6)] dark:shadow-[4px_4px_8px_rgba(14,18,28,0.9),-4px_-4px_8px_rgba(42,49,68,0.5)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.4),-2px_-2px_4px_rgba(255,255,255,0.4)] hover:dark:shadow-[2px_2px_4px_rgba(14,18,28,0.9),-2px_-2px_4px_rgba(42,49,68,0.5)]'
                         }`}
                     >
                       <IconComponent
                         size={28}
-                        className={newAccountIcon === iconName ? 'text-white' : 'text-[#3D4852]'}
+                        className={newAccountIcon === iconName ? 'text-white' : 'text-[#3D4852] dark:text-[#E2E8F0]'}
                       />
                     </button>
                   ))}
@@ -198,7 +192,7 @@ export function Accounts() {
 
               {/* Color Selection */}
               <div className="mb-6">
-                <label className="block text-[#3D4852] mb-3">Select Color</label>
+                <label className="block text-[#3D4852] dark:text-[#E2E8F0] mb-3">Select Color</label>
                 <div className="grid grid-cols-6 gap-3">
                   {accountColors.map((color) => (
                     <button
@@ -206,7 +200,7 @@ export function Accounts() {
                       onClick={() => setNewAccountColor(color.value)}
                       className={`w-full h-12 rounded-xl transition-all ${newAccountColor === color.value
                         ? 'ring-4 ring-[#6C63FF] ring-offset-2 ring-offset-[#E0E5EC]'
-                        : 'shadow-[4px_4px_8px_rgba(163,177,198,0.6),-4px_-4px_8px_rgba(255,255,255,0.6)]'
+                        : 'shadow-[4px_4px_8px_rgba(163,177,198,0.6),-4px_-4px_8px_rgba(255,255,255,0.6)] dark:shadow-[4px_4px_8px_rgba(14,18,28,0.9),-4px_-4px_8px_rgba(42,49,68,0.5)]'
                         }`}
                       style={{ backgroundColor: color.value }}
                     />
@@ -215,12 +209,11 @@ export function Accounts() {
               </div>
 
               {/* Preview */}
-              <div className="mb-6 p-4 bg-[#E0E5EC] rounded-2xl shadow-[inset_2px_2px_4px_rgba(163,177,198,0.4),inset_-2px_-2px_4px_rgba(255,255,255,0.4)]">
-                <p className="text-[#8B92A0] text-sm mb-3">Preview</p>
+              <div className="mb-6 p-4 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-2xl shadow-[inset_2px_2px_4px_rgba(163,177,198,0.4),inset_-2px_-2px_4px_rgba(255,255,255,0.4)] dark:shadow-[inset_2px_2px_4px_rgba(14,18,28,0.9),inset_-2px_-2px_4px_rgba(42,49,68,0.5)]">
+                <p className="text-[#8B92A0] dark:text-[#8892A0] text-sm mb-3">Preview</p>
                 <div className="flex items-center gap-4">
                   <div
-                    className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-[inset_4px_4px_8px_rgba(163,177,198,0.6),inset_-4px_-4px_8px_rgba(255,255,255,0.6)]"
-                    style={{ backgroundColor: '#E0E5EC' }}
+                    className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-[inset_4px_4px_8px_rgba(163,177,198,0.6),inset_-4px_-4px_8px_rgba(255,255,255,0.6)] dark:shadow-[inset_4px_4px_8px_rgba(14,18,28,0.9),inset_-4px_-4px_8px_rgba(42,49,68,0.5)] bg-[#E0E5EC] dark:bg-[#252C3E]"
                   >
                     {(() => {
                       const PreviewIcon = iconMap[newAccountIcon] || Wallet;
@@ -228,8 +221,8 @@ export function Accounts() {
                     })()}
                   </div>
                   <div>
-                    <p className="text-[#3D4852]">{newAccountName || 'Account Name'}</p>
-                    <p className="text-[#8B92A0] text-sm">{formatCurrency(Number(newAccountBalance) || 0)}</p>
+                    <p className="text-[#3D4852] dark:text-[#E2E8F0]">{newAccountName || 'Account Name'}</p>
+                    <p className="text-[#8B92A0] dark:text-[#8892A0] text-sm">{formatCurrency(Number(newAccountBalance) || 0)}</p>
                   </div>
                 </div>
               </div>
@@ -268,11 +261,11 @@ export function Accounts() {
             className="max-w-md w-full mx-4"
           >
             <NeumorphicCard className="p-6">
-              <h3 className="text-[#3D4852] text-2xl mb-6">Transfer Between Accounts</h3>
+              <h3 className="text-[#3D4852] dark:text-[#E2E8F0] text-2xl mb-6">Transfer Between Accounts</h3>
 
               {/* From Account */}
               <div className="mb-6">
-                <label className="block text-[#3D4852] mb-2">From Account</label>
+                <label className="block text-[#3D4852] dark:text-[#E2E8F0] mb-2">From Account</label>
                 <NeumorphicSelect
                   value={transferFromAccount}
                   onChange={(e) => setTransferFromAccount(e.target.value)}
@@ -288,7 +281,7 @@ export function Accounts() {
 
               {/* To Account */}
               <div className="mb-6">
-                <label className="block text-[#3D4852] mb-2">To Account</label>
+                <label className="block text-[#3D4852] dark:text-[#E2E8F0] mb-2">To Account</label>
                 <NeumorphicSelect
                   value={transferToAccount}
                   onChange={(e) => setTransferToAccount(e.target.value)}
@@ -306,7 +299,7 @@ export function Accounts() {
 
               {/* Amount */}
               <div className="mb-6">
-                <label className="block text-[#3D4852] mb-2">Amount (VND)</label>
+                <label className="block text-[#3D4852] dark:text-[#E2E8F0] mb-2">Amount (VND)</label>
                 <NeumorphicInput
                   type="number"
                   placeholder="0"
@@ -317,7 +310,7 @@ export function Accounts() {
 
               {/* Note */}
               <div className="mb-6">
-                <label className="block text-[#3D4852] mb-2">Note (Optional)</label>
+                <label className="block text-[#3D4852] dark:text-[#E2E8F0] mb-2">Note (Optional)</label>
                 <NeumorphicInput
                   type="text"
                   placeholder="Transfer note..."
@@ -328,8 +321,8 @@ export function Accounts() {
 
               {/* Preview */}
               {transferFromAccount && transferToAccount && transferAmount && (
-                <div className="mb-6 p-4 bg-[#E0E5EC] rounded-2xl shadow-[inset_2px_2px_4px_rgba(163,177,198,0.4),inset_-2px_-2px_4px_rgba(255,255,255,0.4)]">
-                  <p className="text-[#8B92A0] text-sm mb-3">Transfer Preview</p>
+                <div className="mb-6 p-4 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-2xl shadow-[inset_2px_2px_4px_rgba(163,177,198,0.4),inset_-2px_-2px_4px_rgba(255,255,255,0.4)] dark:shadow-[inset_2px_2px_4px_rgba(14,18,28,0.9),inset_-2px_-2px_4px_rgba(42,49,68,0.5)]">
+                  <p className="text-[#8B92A0] dark:text-[#8892A0] text-sm mb-3">Transfer Preview</p>
                   <div className="space-y-3">
                     {(() => {
                       const fromAcc = accounts.find(a => a.id === transferFromAccount);
@@ -338,24 +331,24 @@ export function Accounts() {
                       return (
                         <>
                           <div className="flex items-center justify-between">
-                            <span className="text-[#8B92A0]">{fromAcc?.name}</span>
+                            <span className="text-[#8B92A0] dark:text-[#8892A0]">{fromAcc?.name}</span>
                             <span className="text-[#FF6B6B]">-{formatCurrency(amount)}</span>
                           </div>
                           <div className="flex justify-center">
                             <ArrowRightLeft size={16} className="text-[#6C63FF]" />
                           </div>
                           <div className="flex items-center justify-between">
-                            <span className="text-[#8B92A0]">{toAcc?.name}</span>
+                            <span className="text-[#8B92A0] dark:text-[#8892A0]">{toAcc?.name}</span>
                             <span className="text-[#4ECDC4]">+{formatCurrency(amount)}</span>
                           </div>
-                          <div className="border-t border-[#CDD2D9]/30 pt-3 mt-3">
+                          <div className="border-t border-[#CDD2D9]/30 dark:border-[#2A3144]/30 pt-3 mt-3">
                             <div className="flex items-center justify-between text-sm">
-                              <span className="text-[#8B92A0]">{fromAcc?.name} New Balance:</span>
-                              <span className="text-[#3D4852]">{formatCurrency((fromAcc?.balance || 0) - amount)}</span>
+                              <span className="text-[#8B92A0] dark:text-[#8892A0]">{fromAcc?.name} New Balance:</span>
+                              <span className="text-[#3D4852] dark:text-[#E2E8F0]">{formatCurrency((fromAcc?.balance || 0) - amount)}</span>
                             </div>
                             <div className="flex items-center justify-between text-sm">
-                              <span className="text-[#8B92A0]">{toAcc?.name} New Balance:</span>
-                              <span className="text-[#3D4852]">{formatCurrency((toAcc?.balance || 0) + amount)}</span>
+                              <span className="text-[#8B92A0] dark:text-[#8892A0]">{toAcc?.name} New Balance:</span>
+                              <span className="text-[#3D4852] dark:text-[#E2E8F0]">{formatCurrency((toAcc?.balance || 0) + amount)}</span>
                             </div>
                           </div>
                         </>
@@ -400,12 +393,12 @@ export function Accounts() {
           >
             <NeumorphicCard className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-[#3D4852] text-2xl">Manage Accounts</h3>
+                <h3 className="text-[#3D4852] dark:text-[#E2E8F0] text-2xl">Manage Accounts</h3>
                 <button
                   onClick={() => setShowManageForm(false)}
-                  className="w-10 h-10 bg-[#E0E5EC] rounded-xl shadow-[4px_4px_8px_rgba(163,177,198,0.4),-4px_-4px_8px_rgba(255,255,255,0.4)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.3),-2px_-2px_4px_rgba(255,255,255,0.3)] flex items-center justify-center transition-all"
+                  className="w-10 h-10 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-xl shadow-[4px_4px_8px_rgba(163,177,198,0.4),-4px_-4px_8px_rgba(255,255,255,0.4)] dark:shadow-[4px_4px_8px_rgba(14,18,28,0.9),-4px_-4px_8px_rgba(42,49,68,0.5)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.3),-2px_-2px_4px_rgba(255,255,255,0.3)] hover:dark:shadow-[2px_2px_4px_rgba(14,18,28,0.9),-2px_-2px_4px_rgba(42,49,68,0.5)] flex items-center justify-center transition-all"
                 >
-                  <X size={20} className="text-[#8B92A0]" />
+                  <X size={20} className="text-[#8B92A0] dark:text-[#8892A0]" />
                 </button>
               </div>
 
@@ -415,31 +408,30 @@ export function Accounts() {
                   return (
                     <div
                       key={account.id}
-                      className="p-4 bg-[#E0E5EC] rounded-2xl shadow-[inset_2px_2px_4px_rgba(163,177,198,0.4),inset_-2px_-2px_4px_rgba(255,255,255,0.4)]"
+                      className="p-4 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-2xl shadow-[inset_2px_2px_4px_rgba(163,177,198,0.4),inset_-2px_-2px_4px_rgba(255,255,255,0.4)] dark:shadow-[inset_2px_2px_4px_rgba(14,18,28,0.9),inset_-2px_-2px_4px_rgba(42,49,68,0.5)]"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
                           <div
-                            className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-[4px_4px_8px_rgba(163,177,198,0.6),-4px_-4px_8px_rgba(255,255,255,0.6)]"
-                            style={{ backgroundColor: '#E0E5EC' }}
+                            className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-[4px_4px_8px_rgba(163,177,198,0.6),-4px_-4px_8px_rgba(255,255,255,0.6)] dark:shadow-[4px_4px_8px_rgba(14,18,28,0.9),-4px_-4px_8px_rgba(42,49,68,0.5)] bg-[#E0E5EC] dark:bg-[#252C3E]"
                           >
                             <Icon size={24} style={{ color: account.color }} />
                           </div>
                           <div>
-                            <p className="text-[#3D4852] font-medium">{account.name}</p>
-                            <p className="text-[#8B92A0] text-sm">{formatCurrency(account.balance)}</p>
+                            <p className="text-[#3D4852] dark:text-[#E2E8F0] font-medium">{account.name}</p>
+                            <p className="text-[#8B92A0] dark:text-[#8892A0] text-sm">{formatCurrency(account.balance)}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
                           <button
-                            onClick={() => setEditingAccountId(account.id)}
-                            className="w-10 h-10 bg-[#E0E5EC] rounded-xl shadow-[4px_4px_8px_rgba(163,177,198,0.4),-4px_-4px_8px_rgba(255,255,255,0.4)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.3),-2px_-2px_4px_rgba(255,255,255,0.3)] flex items-center justify-center transition-all"
+                            onClick={() => { /* TODO: Implement edit */ }}
+                            className="w-10 h-10 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-xl shadow-[4px_4px_8px_rgba(163,177,198,0.4),-4px_-4px_8px_rgba(255,255,255,0.4)] dark:shadow-[4px_4px_8px_rgba(14,18,28,0.9),-4px_-4px_8px_rgba(42,49,68,0.5)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.3),-2px_-2px_4px_rgba(255,255,255,0.3)] hover:dark:shadow-[2px_2px_4px_rgba(14,18,28,0.9),-2px_-2px_4px_rgba(42,49,68,0.5)] flex items-center justify-center transition-all"
                           >
                             <Edit2 size={16} className="text-[#6C63FF]" />
                           </button>
                           <button
                             onClick={() => setDeleteConfirmId(account.id)}
-                            className="w-10 h-10 bg-[#E0E5EC] rounded-xl shadow-[4px_4px_8px_rgba(163,177,198,0.4),-4px_-4px_8px_rgba(255,255,255,0.4)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.3),-2px_-2px_4px_rgba(255,255,255,0.3)] flex items-center justify-center transition-all"
+                            className="w-10 h-10 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-xl shadow-[4px_4px_8px_rgba(163,177,198,0.4),-4px_-4px_8px_rgba(255,255,255,0.4)] dark:shadow-[4px_4px_8px_rgba(14,18,28,0.9),-4px_-4px_8px_rgba(42,49,68,0.5)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.3),-2px_-2px_4px_rgba(255,255,255,0.3)] hover:dark:shadow-[2px_2px_4px_rgba(14,18,28,0.9),-2px_-2px_4px_rgba(42,49,68,0.5)] flex items-center justify-center transition-all"
                           >
                             <Trash2 size={16} className="text-[#FF6B6B]" />
                           </button>
@@ -451,7 +443,7 @@ export function Accounts() {
                         <motion.div
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: 'auto' }}
-                          className="mt-4 pt-4 border-t border-[#CDD2D9]/30"
+                          className="mt-4 pt-4 border-t border-[#CDD2D9]/30 dark:border-[#2A3144]/30"
                         >
                           <p className="text-[#FF6B6B] text-sm mb-3">
                             Are you sure you want to delete this account? This action cannot be undone.
@@ -497,8 +489,8 @@ export function Accounts() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-[#3D4852] text-3xl mb-2">My Accounts</h1>
-          <p className="text-[#8B92A0]">Manage your wallets and bank accounts</p>
+          <h1 className="text-[#3D4852] dark:text-[#E2E8F0] text-3xl mb-2">My Accounts</h1>
+          <p className="text-[#8B92A0] dark:text-[#8892A0]">Manage your wallets and bank accounts</p>
         </div>
         <NeumorphicButton variant="primary" onClick={() => setShowForm(true)}>
           <Plus size={20} className="inline mr-2" />
@@ -519,22 +511,21 @@ export function Accounts() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
             >
-              <NeumorphicCard className="p-6 hover:shadow-[6px_6px_12px_rgba(163,177,198,0.5),-6px_-6px_12px_rgba(255,255,255,0.5)] transition-all cursor-pointer">
+              <NeumorphicCard className="p-6 hover:shadow-[6px_6px_12px_rgba(163,177,198,0.5),-6px_-6px_12px_rgba(255,255,255,0.5)] hover:dark:shadow-[6px_6px_12px_rgba(14,18,28,0.9),-6px_-6px_12px_rgba(42,49,68,0.5)] transition-all cursor-pointer">
                 <div className="flex items-start justify-between mb-6">
                   <div
-                    className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-[inset_4px_4px_8px_rgba(163,177,198,0.6),inset_-4px_-4px_8px_rgba(255,255,255,0.6)]"
-                    style={{ backgroundColor: '#E0E5EC' }}
+                    className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-[inset_4px_4px_8px_rgba(163,177,198,0.6),inset_-4px_-4px_8px_rgba(255,255,255,0.6)] dark:shadow-[inset_4px_4px_8px_rgba(14,18,28,0.9),inset_-4px_-4px_8px_rgba(42,49,68,0.5)] bg-[#E0E5EC] dark:bg-[#1E2330]"
                   >
                     <Icon size={28} style={{ color: account.color }} />
                   </div>
-                  <button className="w-10 h-10 bg-[#E0E5EC] rounded-xl shadow-[4px_4px_8px_rgba(163,177,198,0.4),-4px_-4px_8px_rgba(255,255,255,0.4)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.3),-2px_-2px_4px_rgba(255,255,255,0.3)] flex items-center justify-center transition-all">
+                  <button className="w-10 h-10 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-xl shadow-[4px_4px_8px_rgba(163,177,198,0.4),-4px_-4px_8px_rgba(255,255,255,0.4)] dark:shadow-[4px_4px_8px_rgba(14,18,28,0.9),-4px_-4px_8px_rgba(42,49,68,0.5)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.3),-2px_-2px_4px_rgba(255,255,255,0.3)] hover:dark:shadow-[2px_2px_4px_rgba(14,18,28,0.9),-2px_-2px_4px_rgba(42,49,68,0.5)] flex items-center justify-center transition-all">
                     <ArrowRightLeft size={16} className="text-[#6C63FF]" />
                   </button>
                 </div>
                 <div>
-                  <p className="text-[#8B92A0] text-sm mb-2">{account.name}</p>
-                  <p className="text-2xl text-[#3D4852] mb-3">{formatCurrency(account.balance)}</p>
-                  <div className="flex items-center gap-2 text-[#8B92A0] text-sm">
+                  <p className="text-[#8B92A0] dark:text-[#8892A0] text-sm mb-2">{account.name}</p>
+                  <p className="text-2xl text-[#3D4852] dark:text-[#E2E8F0] mb-3">{formatCurrency(account.balance)}</p>
+                  <div className="flex items-center gap-2 text-[#8B92A0] dark:text-[#8892A0] text-sm">
                     <span>{percentage.toFixed(1)}% of total</span>
                   </div>
                 </div>
@@ -553,8 +544,8 @@ export function Accounts() {
           transition={{ delay: 0.5 }}
         >
           <NeumorphicCard className="p-6">
-            <h3 className="text-[#3D4852] text-xl mb-6">Balance Distribution</h3>
-            <div className="bg-[#E0E5EC] p-4 rounded-3xl shadow-[inset_6px_6px_12px_rgba(163,177,198,0.6),inset_-6px_-6px_12px_rgba(255,255,255,0.6)]">
+            <h3 className="text-[#3D4852] dark:text-[#E2E8F0] text-xl mb-6">Balance Distribution</h3>
+            <div className="bg-[#E0E5EC] dark:bg-[#252C3E] p-4 rounded-3xl shadow-[inset_6px_6px_12px_rgba(163,177,198,0.6),inset_-6px_-6px_12px_rgba(255,255,255,0.6)] dark:shadow-[inset_6px_6px_12px_rgba(14,18,28,0.9),inset_-6px_-6px_12px_rgba(42,49,68,0.5)]">
               <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
                   <Pie
@@ -564,7 +555,7 @@ export function Accounts() {
                     innerRadius={60}
                     outerRadius={100}
                     dataKey="value"
-                    label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`}
+                    label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
                   >
                     {chartData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
@@ -578,9 +569,9 @@ export function Accounts() {
                 <div key={data.name} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-4 h-4 rounded-full" style={{ backgroundColor: data.color }}></div>
-                    <span className="text-[#3D4852]">{data.name}</span>
+                    <span className="text-[#3D4852] dark:text-[#E2E8F0]">{data.name}</span>
                   </div>
-                  <span className="text-[#8B92A0]">{formatCurrency(data.value)}</span>
+                  <span className="text-[#8B92A0] dark:text-[#8892A0]">{formatCurrency(data.value)}</span>
                 </div>
               ))}
             </div>
@@ -598,8 +589,8 @@ export function Accounts() {
             <NeumorphicCard className="p-8">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[#8B92A0] mb-2">Total Balance Across All Accounts</p>
-                  <h2 className="text-5xl text-[#3D4852] mb-3">{formatCurrency(totalBalance)}</h2>
+                  <p className="text-[#8B92A0] dark:text-[#8892A0] mb-2">Total Balance Across All Accounts</p>
+                  <h2 className="text-5xl text-[#3D4852] dark:text-[#E2E8F0] mb-3">{formatCurrency(totalBalance)}</h2>
                   <div className="flex items-center gap-2 text-[#4ECDC4]">
                     <TrendingUp size={20} />
                     <span>+8.2% this month</span>
@@ -624,17 +615,17 @@ export function Accounts() {
             transition={{ delay: 0.7 }}
           >
             <NeumorphicCard className="p-6">
-              <h3 className="text-[#3D4852] text-xl mb-6">Recent Account Activity</h3>
+              <h3 className="text-[#3D4852] dark:text-[#E2E8F0] text-xl mb-6">Recent Account Activity</h3>
               <div className="space-y-4">
-                {transactions.slice(0, 6).map((transaction, index) => {
+                {transactions.slice(0, 6).map((transaction) => {
                   const account = accounts.find(a => a.id === transaction.accountId);
                   const fromAccount = accounts.find(a => a.id === transaction.fromAccountId);
                   const toAccount = accounts.find(a => a.id === transaction.toAccountId);
 
                   return (
-                    <div key={transaction.id} className="flex items-center justify-between py-3 border-b border-[#CDD2D9]/30 last:border-0">
+                    <div key={transaction.id} className="flex items-center justify-between py-3 border-b border-[#CDD2D9]/30 dark:border-[#2A3144]/30 last:border-0">
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-[#E0E5EC] rounded-2xl shadow-[inset_3px_3px_6px_rgba(163,177,198,0.6),inset_-3px_-3px_6px_rgba(255,255,255,0.6)] flex items-center justify-center">
+                        <div className="w-12 h-12 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-2xl shadow-[inset_3px_3px_6px_rgba(163,177,198,0.6),inset_-3px_-3px_6px_rgba(255,255,255,0.6)] dark:shadow-[inset_3px_3px_6px_rgba(14,18,28,0.9),inset_-3px_-3px_6px_rgba(42,49,68,0.5)] flex items-center justify-center">
                           {transaction.type === 'income' ? (
                             <TrendingUp size={20} className="text-[#4ECDC4]" />
                           ) : transaction.type === 'transfer' ? (
@@ -644,8 +635,8 @@ export function Accounts() {
                           )}
                         </div>
                         <div>
-                          <p className="text-[#3D4852] mb-1">{transaction.description}</p>
-                          <p className="text-[#8B92A0] text-sm">
+                          <p className="text-[#3D4852] dark:text-[#E2E8F0] mb-1">{transaction.description}</p>
+                          <p className="text-[#8B92A0] dark:text-[#8892A0] text-sm">
                             {transaction.type === 'transfer'
                               ? `${fromAccount?.name} → ${toAccount?.name}`
                               : account?.name
