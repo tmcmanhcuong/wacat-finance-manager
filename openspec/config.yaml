@@ -5,29 +5,43 @@ context: |
 
   ## Project Overview
   WaCat is a Personal Finance Management System (SPA) built with a
-  Neumorphism (Soft UI) design system using a Cool Grey monochromatic palette.
+  Neumorphism (Soft UI) design system using a Cool Grey monochromatic palette
+  with full Dark Mode support (Dark Neumorphism).
   All AI-generated code, proposals, and tasks MUST conform to this context.
 
   ## Tech Stack
-  - Framework: React 18.3.1 (TypeScript)
+  - Framework: React 18.3.1 (TypeScript — strict mode)
   - Routing: React Router 7.13.0 (createBrowserRouter)
   - Styling: Tailwind CSS 4.1.12 (utility-first, NO inline styles for design tokens)
   - Animation: Motion (Framer Motion) 12.23.24 — imported from "motion/react"
   - Icons: Lucide React 0.487.0 — ONLY Lucide, never emoji or other icon libs
   - Charts: Recharts 2.15.2
   - Build Tool: Vite 6.3.5
+  - Backend: Supabase (@supabase/supabase-js ^2.99.0)
+  - Utility: clsx + tailwind-merge (via cn() helper in neumorphic-card.tsx)
+
+  ## TypeScript Standards (STRICT)
+  - tsconfig.json: strict: true, noImplicitAny: true, noUnusedLocals: true
+  - NO implicit `any` types anywhere in the codebase
+  - Event handlers must use explicit types: ChangeEvent<HTMLInputElement>, ChangeEvent<HTMLSelectElement>
+  - Icon maps must use `Record<string, LucideIcon>` (import `type LucideIcon` from lucide-react)
+  - Error handling: always `catch (err)` + `err instanceof Error` type guard, NEVER `catch (err: any)`
+  - All catch blocks use: `err instanceof Error ? err.message : 'Fallback message'`
+  - No `console.log` in production code; `console.error` permitted only in hooks for fetch errors
 
   ## Project Structure
   src/
     app/
       App.tsx              # Root — only exports default App with <RouterProvider>
       routes.ts            # createBrowserRouter config
-      store.ts             # Mock data arrays + utility functions (formatCurrency, etc.)
-      types.ts             # All TypeScript interfaces
+      store.ts             # Mock data arrays + utility functions (formatCurrency, daysUntil, etc.)
+      types.ts             # All TypeScript interfaces — single source of truth
       components/
-        sidebar.tsx        # Fixed left nav (w-72)
-        neumorphic-card.tsx # NeumorphicCard | NeumorphicButton | NeumorphicInput | NeumorphicSelect
-        ui/                # (optional) Shadcn UI components
+        sidebar.tsx          # Fixed left nav (w-72), uses LucideIcon typed navItems array
+        neumorphic-card.tsx  # NeumorphicCard | NeumorphicButton | NeumorphicInput | NeumorphicSelect
+                             # Also exports: cn() helper (clsx + tailwind-merge)
+        theme-provider.tsx   # ThemeProvider + useThemeContext hook (light/dark/system modes)
+        ui/                  # (optional) Shadcn UI components
       pages/
         root.tsx           # Layout: flex, Sidebar + <Outlet />, main ml-72 p-12
         dashboard.tsx
@@ -36,11 +50,70 @@ context: |
         categories.tsx
         debts.tsx
         subscriptions.tsx
+    hooks/                 # Custom hooks — ALL business logic lives here, NOT in pages
+      useAccounts.ts       # Account CRUD + balance mutations
+      useTransactions.ts   # Transaction CRUD + balance side effects
+      useDebts.ts          # Debt logic: markAsReceived, payInstallment
+      useCategories.ts     # Category CRUD
+      useSubscriptions.ts  # Subscription CRUD
+      useTheme.ts          # Theme persistence hook (localStorage + system detection)
+    services/              # Supabase data layer — thin wrappers over supabase client
+      accounts.ts
+      transactions.ts
+      debts.ts
+      categories.ts
+      subscriptions.ts
+    lib/
+      supabase.ts          # Supabase client init (reads from .env.local)
     styles/
-      theme.css            # CSS variables & design tokens
-      fonts.css            # Google Fonts (Plus Jakarta Sans, DM Sans)
-      index.css            # Global resets
-      tailwind.css         # Tailwind imports
+      theme.css            # CSS variables & design tokens (light + dark variants)
+      index.css            # Global resets + Tailwind imports
+
+  ## Custom Hooks Pattern (MANDATORY)
+  All business logic MUST live in src/hooks/, NOT inline in page components.
+  Hook structure (use useAccounts as canonical example):
+    - useState<T[]>([]) for data
+    - useState(true) for loading
+    - useState<string | null>(null) for error
+    - useCallback + useEffect for initial fetch
+    - Optimistic updates: update local state first, then persist to Supabase
+    - On error: rollback to previous state + setError()
+  Pages only import hooks + render UI — no direct Supabase calls in pages.
+
+  ## Supabase Services Pattern
+  Each service in src/services/ is a plain object with async methods:
+    getAll(): Promise<T[]>
+    create(data: Omit<T, 'id'>): Promise<T>
+    update(id: string, data: Partial<T>): Promise<T>
+    delete(id: string): Promise<void>
+    updateBalance(id, newBalance): Promise<void>   # accounts only
+    addPayment(debtId, payment): Promise<PaymentHistory>  # debts only
+  Services read from VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY in .env.local.
+  .env.local is NEVER committed to git (in .gitignore).
+
+  ## Dark Neumorphism (Theme System)
+  The app supports 3 theme modes: "light" | "dark" | "system" (default: system).
+  Theme is toggled via ThemeToggleButton in Dashboard header (Sun/Monitor/Moon icons).
+  Theme state is persisted to localStorage key "wacat-theme".
+  Implementation:
+    - ThemeProvider wraps the app in App.tsx, applies class "dark" to <html>
+    - useThemeContext() hook exposes: { mode, resolved, setTheme }
+    - All Tailwind dark: variants are used (e.g. dark:bg-[#1E2330])
+
+  ### Dark Mode Color Palette
+  Light background:  #E0E5EC  |  Dark background:  #1E2330 / #252C3E
+  Light text:        #3D4852  |  Dark text:         #E2E8F0
+  Light muted:       #8B92A0  |  Dark muted:        #8892A0
+  Light shadow light: rgba(255,255,255,0.6)  |  Dark shadow light: rgba(42,49,68,0.5)
+  Light shadow dark:  rgba(163,177,198,0.6)  |  Dark shadow dark:  rgba(14,18,28,0.9)
+
+  ### Dark Neumorphism Shadows (both light and dark variants required)
+  Extruded:
+    shadow-[8px_8px_16px_rgba(163,177,198,0.6),-8px_-8px_16px_rgba(255,255,255,0.6)]
+    dark:shadow-[8px_8px_16px_rgba(14,18,28,0.9),-8px_-8px_16px_rgba(42,49,68,0.5)]
+  Inset:
+    shadow-[inset_6px_6px_12px_rgba(163,177,198,0.6),inset_-6px_-6px_12px_rgba(255,255,255,0.6)]
+    dark:shadow-[inset_6px_6px_12px_rgba(14,18,28,0.9),inset_-6px_-6px_12px_rgba(42,49,68,0.5)]
 
   ## Design System — Neumorphism (Soft UI)
   Background: #E0E5EC (Cool Grey) — ALWAYS used as the page/component background.
@@ -61,11 +134,6 @@ context: |
   Weights: 500 (headers, labels, buttons) | 400 (body, inputs)
   Sizes: h1=2xl, h2=xl, h3=lg, h4=base, body=base
 
-  ### Neumorphism Shadows (Tailwind arbitrary values)
-  Extruded (raised):  shadow-[8px_8px_16px_rgba(163,177,198,0.6),-8px_-8px_16px_rgba(255,255,255,0.6)]
-  Inset (pressed):    shadow-[inset_6px_6px_12px_rgba(163,177,198,0.6),inset_-6px_-6px_12px_rgba(255,255,255,0.6)]
-  Flat (subtle):      shadow-[4px_4px_8px_rgba(163,177,198,0.4),-4px_-4px_8px_rgba(255,255,255,0.4)]
-
   ### Border Radius
   Cards:          rounded-[32px]
   Buttons/Inputs: rounded-2xl (16px)
@@ -76,6 +144,11 @@ context: |
   Inputs:     min-h-[44px]
   Nav items:  min-h-[56px]
 
+  ### cn() Helper (className merging)
+  Import from neumorphic-card.tsx: import { cn } from '../components/neumorphic-card'
+  Use cn() instead of template literals for all dynamic className composition.
+  cn() = twMerge(clsx(inputs)) — prevents conflicting Tailwind class duplicates.
+
   ### Spacing Scale
   gap-2 (8px) tight | gap-4 (16px) standard | gap-6 (24px) loose | gap-8 (32px) sections
   Card padding: p-6 (24px) | Page padding: p-12 (48px)
@@ -85,7 +158,9 @@ context: |
 
   ### NeumorphicCard
   Props: variant ("extruded" default | "inset" | "flat"), className, onClick, children
+  ALWAYS specify variant explicitly — never rely on default.
   Use "inset" for data wells and charts, "extruded" for regular cards, "flat" for subtle elevation.
+  className is merged via cn() internally.
 
   ### NeumorphicButton
   Props: variant ("primary" purple | "secondary" grey default), size ("sm"|"md"|"lg"), disabled, onClick
@@ -93,6 +168,7 @@ context: |
 
   ### NeumorphicInput / NeumorphicSelect
   Standard form fields with inset shadow, min-h-[44px], rounded-2xl.
+  onChange must use explicit type: (e: ChangeEvent<HTMLInputElement>) => ...
 
   ## Data Models (from types.ts)
   Account:      { id, name, balance (VND), icon (Lucide name), color (hex) }
@@ -102,6 +178,7 @@ context: |
   Debt:         { id, type ("lent"|"borrowed"|"installments"), person, amount, totalAmount,
                   dueDate?, description?, paymentHistory?: PaymentHistory[] }
   Subscription: { id, name, amount, nextPaymentDate (ISO), icon, color, category }
+  PaymentHistory: { id, date, amount, note, progressAtTime }
 
   Special auto-generated categories:
     "debt-collection" (income, #4ECDC4) — used when marking debt as received
@@ -116,7 +193,7 @@ context: |
 
   ## Business Logic Rules
   1. Transfers do NOT count in Income/Expense statistics — always exclude type === "transfer".
-  2. Creating a transaction MUST update the related account balance:
+  2. Creating a transaction MUST update the related account balance (via accountsService.updateBalance):
        income  → account.balance += amount
        expense → account.balance -= amount
        transfer → fromAccount.balance -= amount; toAccount.balance += amount
@@ -124,6 +201,8 @@ context: |
   4. Debt "Pay Installment" → creates Expense transaction (category: debt-payment) + updates debt.amount + adds to paymentHistory.
   5. Amount validations: must be > 0 and ≤ outstanding balance (for debt payments); check insufficient balance.
   6. Monthly stats: filter transactions where date >= start of current month AND type !== "transfer".
+  7. Deleting a transaction MUST reverse the account balance change (atomic rollback).
+  8. All mutations use optimistic updates: update local state first, persist to Supabase second, rollback on error.
 
   ## Routing (React Router)
   /                → Dashboard
@@ -136,43 +215,55 @@ context: |
   ## Coding Conventions
   - File naming: kebab-case.tsx for components/pages; types.ts, store.ts (singular)
   - Exports: named exports for all pages/components; default export ONLY for App.tsx
-  - Import order: (1) external libs → (2) lucide-react icons → (3) local components → (4) store & types
+  - Import order: (1) external libs → (2) lucide-react icons (with `type LucideIcon`) → (3) local components → (4) hooks → (5) store & types
+  - Icon maps: always `Record<string, LucideIcon>`, never `Record<string, any>`
   - State naming: showForm/isLoading/hasError for booleans; selectedX for selections; plain noun for form fields
   - Event handlers: handleSubmit, handleDelete(id), handleEdit(item), handleInputChange(e)
   - Conditional rendering: ternary for two branches; && for single; early return for complex guards
   - TypeScript: use interfaces from types.ts; annotate complex states; let simple states be inferred
+  - className: always use cn() from neumorphic-card.tsx for dynamic composition
 
   ## UI/UX Patterns
   Modal: motion.div overlay (fixed inset-0, bg-black/30, backdrop-blur-sm, z-50) +
          motion.div content (max-w-lg, scale 0.9→1, y 20→0). Close on backdrop click, stop propagation on content.
   Empty state: inset NeumorphicCard, 48px centered icon (#8B92A0), two lines of muted text + CTA hint.
-  Progress bar: inset track on #E0E5EC, filled with #4ECDC4, rounded-full, transition-all.
+  Progress bar: inset track on #E0E5EC dark:#252C3E, filled with #4ECDC4, rounded-full, transition-all.
   Info boxes: bg-[color]/10 + border-2 border-[color]/30 with Info icon.
   Validation: required fields marked with <span class="text-[#FF6B6B]">*</span>; inline error/success below field.
   Animations: page entrance opacity 0→1, y 20→0; staggered list delay index*0.05; modal scale 0.9→1.
+  Loading state: <Loader2 size={40} className="text-[#6C63FF] animate-spin" /> centered in h-96 div.
 
   ## Best Practices Checklist
   ✅ max-w-[1600px] mx-auto for content wrapper
   ✅ formatCurrency() for all monetary values
-  ✅ Lucide icons only (Plus, Trash2, Edit, X, Calendar, TrendingUp, TrendingDown, ArrowLeftRight, Cat…)
+  ✅ Lucide icons only (Plus, Trash2, Edit2, X, Calendar, TrendingUp, TrendingDown, ArrowLeftRight, Cat…)
   ✅ 44px min touch targets for all interactive elements
   ✅ Unique keys from IDs (never array index) in lists
   ✅ Reset form state when modal closes
-  ✅ Preview changes in form when possible
-  ✅ Remove console.logs before finalizing production code
+  ✅ Always add dark: variant alongside light variant for ALL color/shadow classes
+  ✅ Always specify NeumorphicCard variant explicitly (never rely on default)
+  ✅ Use cn() for dynamic className, never string concatenation
+  ✅ Use LucideIcon type for icon maps, never any
+  ✅ No console.log in production; no catch(err: any)
+  ✅ Remove op_*.json temp files before committing
+  ✅ .env.local never committed (in .gitignore)
 
 rules:
   proposal:
     - Proposals must clearly state the affected pages and components.
     - Always include a "Non-goals" section to scope the change.
     - Reference existing neumorphic component variants (extruded/inset/flat) where applicable.
-    - Keep proposals concise — favor bullet points over paragraphs.
     - State which data models (from types.ts) are involved.
+    - State whether new hooks or services are needed.
+    - Keep proposals concise — favor bullet points over paragraphs.
 
   tasks:
     - Break tasks into atomic chunks of max 2 hours each.
     - Each task must reference the exact file path(s) to be modified.
-    - Tasks that touch transaction logic must explicitly handle account balance updates and stat exclusions.
-    - UI tasks must specify the neumorphic shadow variant and border radius to use.
+    - Tasks that touch transaction/debt logic must explicitly handle account balance updates and stat exclusions.
+    - UI tasks must specify the neumorphic shadow variant AND dark: dark mode variant.
     - Always include a "Validation" sub-task to verify the feature works end-to-end.
     - Order tasks so each one is independently implementable (no hidden dependencies).
+    - Hook tasks must follow the optimistic-update + rollback pattern.
+    - Any new component must include explicit TypeScript types (no implicit any).
+
