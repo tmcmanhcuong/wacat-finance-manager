@@ -146,6 +146,7 @@ export const mockSubscriptions: Subscription[] = [
     icon: 'Music',
     color: '#1DB954',
     category: 'Entertainment',
+    billingCycle: 'monthly',
   },
   {
     id: '2',
@@ -155,6 +156,7 @@ export const mockSubscriptions: Subscription[] = [
     icon: 'Tv',
     color: '#E50914',
     category: 'Entertainment',
+    billingCycle: 'monthly',
   },
   {
     id: '3',
@@ -164,6 +166,7 @@ export const mockSubscriptions: Subscription[] = [
     icon: 'MessageSquare',
     color: '#10A37F',
     category: 'Productivity',
+    billingCycle: 'monthly',
   },
   {
     id: '4',
@@ -173,6 +176,7 @@ export const mockSubscriptions: Subscription[] = [
     icon: 'Palette',
     color: '#FF0000',
     category: 'Work',
+    billingCycle: 'monthly',
   },
 ];
 

@@ -80,6 +80,7 @@ create table if not exists subscriptions (
   icon text not null default 'CreditCard',
   color text not null default '#6C63FF',
   category text not null default 'Other',
+  billing_cycle text not null default 'monthly' check (billing_cycle in ('monthly', 'yearly')),
   created_at timestamptz default now()
 );
 

@@ -65,7 +65,6 @@ op_*.json
 # ─────────────────────────────────────
 # OpenSpec archives (optional: comment out if you want archives in repo)
 # ─────────────────────────────────────
-openspec/changes/archive/
 
 # ─────────────────────────────────────
 # Supabase local dev
@@ -82,3 +81,8 @@ supabase/.temp/
 .Spotlight-V100
 .Trashes
 ehthumbs.db
+
+# AI Agents & Instructions
+.agents/
+.gemini/
+.github/

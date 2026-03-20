@@ -9,6 +9,7 @@ const mapSubscription = (row: any): Subscription => ({
     icon: row.icon,
     color: row.color,
     category: row.category,
+    billingCycle: row.billing_cycle || 'monthly',
 });
 
 export const subscriptionsService = {
@@ -36,6 +37,7 @@ export const subscriptionsService = {
                 icon: subscription.icon,
                 color: subscription.color,
                 category: subscription.category,
+                billing_cycle: subscription.billingCycle,
             })
             .select()
             .single();
@@ -54,6 +56,7 @@ export const subscriptionsService = {
                 icon: updates.icon,
                 color: updates.color,
                 category: updates.category,
+                billing_cycle: updates.billingCycle,
             })
             .eq('id', id)
             .select()

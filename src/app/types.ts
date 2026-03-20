@@ -53,6 +53,7 @@ export interface Subscription {
   icon: string;
   color: string;
   category: string;
+  billingCycle: 'monthly' | 'yearly';
 }
 
 export interface Stats {

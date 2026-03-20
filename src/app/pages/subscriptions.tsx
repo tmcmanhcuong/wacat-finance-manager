@@ -29,10 +29,11 @@ export function Subscriptions() {
   const [subIcon, setSubIcon] = useState('Music');
   const [subColor, setSubColor] = useState('#6C63FF');
   const [subCategory, setSubCategory] = useState('Entertainment');
+  const [subBillingCycle, setSubBillingCycle] = useState<'monthly'|'yearly'>('monthly');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const totalMonthly = useMemo(() => subscriptions.reduce((s, sub) => s + sub.amount, 0), [subscriptions]);
-  const totalYearly = totalMonthly * 12;
+  const totalMonthly = useMemo(() => subscriptions.reduce((s, sub) => s + (sub.billingCycle === 'yearly' ? sub.amount / 12 : sub.amount), 0), [subscriptions]);
+  const totalYearly = useMemo(() => subscriptions.reduce((s, sub) => s + (sub.billingCycle === 'yearly' ? sub.amount : sub.amount * 12), 0), [subscriptions]);
 
   const nextPayment = useMemo(() => {
     if (subscriptions.length === 0) return null;
@@ -50,7 +51,8 @@ export function Subscriptions() {
   const byCategory = useMemo(() => {
     const map: Record<string, number> = {};
     subscriptions.forEach(s => {
-      map[s.category] = (map[s.category] || 0) + s.amount;
+      const monthlyAmount = s.billingCycle === 'yearly' ? s.amount / 12 : s.amount;
+      map[s.category] = (map[s.category] || 0) + monthlyAmount;
     });
     return Object.entries(map).map(([name, amount]) => ({ name, amount }));
   }, [subscriptions]);
@@ -72,9 +74,10 @@ export function Subscriptions() {
         icon: subIcon,
         color: subColor,
         category: subCategory,
+        billingCycle: subBillingCycle,
       });
       setShowForm(false);
-      setSubName(''); setSubAmount(''); setSubDate('');
+      setSubName(''); setSubAmount(''); setSubDate(''); setSubBillingCycle('monthly');
     } catch (err) {
       console.error('Failed to add subscription:', err);
     } finally {
@@ -129,6 +132,13 @@ export function Subscriptions() {
                 <label className="block text-[#3D4852] dark:text-[#E2E8F0] mb-2">Category</label>
                 <NeumorphicSelect value={subCategory} onChange={(e: ChangeEvent<HTMLSelectElement>) => setSubCategory(e.target.value)}>
                   {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                </NeumorphicSelect>
+              </div>
+              <div>
+                <label className="block text-[#3D4852] dark:text-[#E2E8F0] mb-2">Billing Cycle</label>
+                <NeumorphicSelect value={subBillingCycle} onChange={(e: ChangeEvent<HTMLSelectElement>) => setSubBillingCycle(e.target.value as 'monthly' | 'yearly')}>
+                  <option value="monthly">Monthly</option>
+                  <option value="yearly">Yearly</option>
                 </NeumorphicSelect>
               </div>
               <div>
@@ -304,7 +314,7 @@ export function Subscriptions() {
                       </div>
                       <div className="text-right">
                         <p className="text-[#3D4852] dark:text-[#E2E8F0] text-2xl mb-1">{formatCurrency(subscription.amount)}</p>
-                        <p className="text-[#8B92A0] dark:text-[#8892A0] text-sm">/month</p>
+                        <p className="text-[#8B92A0] dark:text-[#8892A0] text-sm">/{subscription.billingCycle === 'yearly' ? 'year' : 'month'}</p>
                       </div>
                     </div>
 
@@ -361,7 +371,7 @@ export function Subscriptions() {
                         {new Date(sub.nextPaymentDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                       </p>
                     </div>
-                    <p className="text-[#6C63FF] text-sm">{formatCurrency(sub.amount)}</p>
+                    <p className="text-[#6C63FF] text-sm">{formatCurrency(sub.amount)}/{sub.billingCycle === 'yearly' ? 'yr' : 'mo'}</p>
                   </div>
                 ))}
             </div>

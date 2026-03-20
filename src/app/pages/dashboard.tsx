@@ -8,6 +8,10 @@ import { useAccounts } from '../../hooks/useAccounts';
 import { useTransactions } from '../../hooks/useTransactions';
 import { useCategories } from '../../hooks/useCategories';
 import { motion } from 'motion/react';
+import { useSubscriptionAutomation } from '../../hooks/useSubscriptionAutomation';
+import { PaymentConfirmationModal } from '../components/payment-confirmation-modal';
+import type { Subscription } from '../types';
+import { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 const iconMap: Record<string, LucideIcon> = {
@@ -52,6 +56,8 @@ export function Dashboard() {
   const { accounts, loading: accountsLoading } = useAccounts();
   const { transactions, loading: txLoading } = useTransactions();
   const { categories, loading: catLoading } = useCategories();
+  const { pendingPayments, confirmPayment } = useSubscriptionAutomation();
+  const [selectedPendingSub, setSelectedPendingSub] = useState<Subscription | null>(null);
 
   const loading = accountsLoading || txLoading || catLoading;
 
@@ -105,6 +111,35 @@ export function Dashboard() {
         {/* Theme Toggle */}
         <ThemeToggleButton />
       </motion.div>
+
+      {/* Pending Payments Alert */}
+      {pendingPayments.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8 space-y-4"
+        >
+          {pendingPayments.map(sub => (
+            <NeumorphicCard key={sub.id} variant="extruded" className="p-4 border-l-4 border-[#FFC75F] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 bg-[#FFC75F]/20 rounded-full flex items-center justify-center text-[#FFC75F] flex-shrink-0">
+                  <Cat size={20} />
+                </div>
+                <div>
+                  <h3 className="text-[#3D4852] dark:text-[#E2E8F0] font-medium">Pending Payment: {sub.name}</h3>
+                  <p className="text-[#8B92A0] text-sm md:text-base">Due for {formatCurrency(sub.amount)} on {sub.nextPaymentDate}</p>
+                </div>
+              </div>
+              <button 
+                className="px-4 py-2 bg-[#FFC75F] text-white rounded-lg shadow-[3px_3px_6px_rgba(255,199,95,0.3)] hover:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.1)] transition-all font-medium whitespace-nowrap"
+                onClick={() => setSelectedPendingSub(sub)}
+              >
+                Confirm Payment
+              </button>
+            </NeumorphicCard>
+          ))}
+        </motion.div>
+      )}
 
       {/* Total Balance Card */}
       <motion.div
@@ -438,6 +473,13 @@ export function Dashboard() {
           </NeumorphicCard>
         </motion.div>
       </div>
+
+      <PaymentConfirmationModal
+        isOpen={selectedPendingSub !== null}
+        subscription={selectedPendingSub}
+        onClose={() => setSelectedPendingSub(null)}
+        onConfirm={confirmPayment}
+      />
     </div>
   );
 }
