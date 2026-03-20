@@ -86,3 +86,6 @@ ehthumbs.db
 .agents/
 .gemini/
 .github/
+
+openspec/
+GEMINI.md
