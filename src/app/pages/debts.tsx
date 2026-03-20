@@ -1,10 +1,11 @@
 import { TrendingUp, TrendingDown, User, CreditCard, Plus, Calendar, X, ShoppingCart, Clock, Info, Loader2, AlertCircle } from 'lucide-react';
 import { NeumorphicCard, NeumorphicButton, NeumorphicInput, NeumorphicSelect } from '../components/neumorphic-card';
-import { formatCurrency, daysUntil } from '../store';
+import { formatCurrency, daysUntil, getLocalISODate } from '../store';
 import { useDebts } from '../../hooks/useDebts';
 import { useAccounts } from '../../hooks/useAccounts';
 import { motion } from 'motion/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '../../lib/supabase';
 import { Debt } from '../types';
 
 export function Debts() {
@@ -22,7 +23,7 @@ export function Debts() {
   const [showReceiveForm, setShowReceiveForm] = useState(false);
   const [selectedDebt, setSelectedDebt] = useState<Debt | null>(null);
   const [receiveAmount, setReceiveAmount] = useState('');
-  const [receiveDate, setReceiveDate] = useState(new Date().toISOString().split('T')[0]);
+  const [receiveDate, setReceiveDate] = useState(getLocalISODate());
   const [receiveNote, setReceiveNote] = useState('');
   const [receiveAccount, setReceiveAccount] = useState('');
 
@@ -30,12 +31,26 @@ export function Debts() {
   const [showPayForm, setShowPayForm] = useState(false);
   const [selectedBorrowedDebt, setSelectedBorrowedDebt] = useState<Debt | null>(null);
   const [payAmount, setPayAmount] = useState('');
-  const [payDate, setPayDate] = useState(new Date().toISOString().split('T')[0]);
+  const [payDate, setPayDate] = useState(getLocalISODate());
   const [payNote, setPayNote] = useState('');
   const [payAccount, setPayAccount] = useState('');
 
   const { debts, addDebt, markAsReceived, payInstallment } = useDebts();
   const { accounts } = useAccounts();
+
+  const [isNewUser, setIsNewUser] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        const createdAt = new Date(user.created_at);
+        const diffDays = (new Date().getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24);
+        if (diffDays <= 7) {
+          setIsNewUser(true);
+        }
+      }
+    });
+  }, []);
 
   const handleOpenForm = () => {
     setSubmitError(null);
@@ -50,7 +65,7 @@ export function Debts() {
   const handleSubmit = async () => {
     const trimmedPerson = person.trim();
     const amountVal = Number(totalAmount);
-    const dateVal = dueDate || new Date().toISOString().split('T')[0];
+    const dateVal = dueDate || getLocalISODate();
 
     if (!trimmedPerson) {
       setSubmitError('Person/Store name is required');
@@ -568,19 +583,21 @@ export function Debts() {
                 </div>
 
                 {/* Scrollable Body */}
-                <div className="flex-1 overflow-y-auto px-6 pb-6">
+                <div className="flex-1 overflow-y-auto px-6 pb-6 pt-2">
                   {/* Info Box */}
-                  <div className="mb-6 p-4 bg-[#4ECDC4]/10 rounded-2xl border-2 border-[#4ECDC4]/30">
-                    <div className="flex items-start gap-3">
-                      <Info size={20} className="text-[#4ECDC4] flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-[#3D4852] dark:text-[#E2E8F0] font-medium mb-1">How it works:</p>
-                        <p className="text-[#8B92A0] dark:text-[#8892A0] text-sm">
-                          When you mark money as received, an <span className="text-[#4ECDC4] font-medium">Income transaction</span> will be automatically created in your selected account, and the account balance will be updated accordingly.
-                        </p>
+                  {isNewUser && (
+                    <div className="mb-6 p-4 bg-[#4ECDC4]/10 rounded-2xl border-2 border-[#4ECDC4]/30">
+                      <div className="flex items-start gap-3">
+                        <Info size={20} className="text-[#4ECDC4] flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-[#3D4852] dark:text-[#E2E8F0] font-medium mb-1">How it works:</p>
+                          <p className="text-[#8B92A0] dark:text-[#8892A0] text-sm">
+                            When you mark money as received, an <span className="text-[#4ECDC4] font-medium">Income transaction</span> will be automatically created in your selected account, and the account balance will be updated accordingly.
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* 2 Column Layout */}
                   <div className="grid grid-cols-2 gap-6">
@@ -690,7 +707,7 @@ export function Debts() {
                                 );
                                 setShowReceiveForm(false);
                                 setReceiveAmount('');
-                                setReceiveDate(new Date().toISOString().split('T')[0]);
+                                setReceiveDate(getLocalISODate());
                                 setReceiveNote('');
                                 setReceiveAccount('');
                               } catch (err) {
@@ -895,19 +912,21 @@ export function Debts() {
                 </div>
 
                 {/* Scrollable Body */}
-                <div className="flex-1 overflow-y-auto px-6 pb-6">
+                <div className="flex-1 overflow-y-auto px-6 pb-6 pt-2">
                   {/* Info Box */}
-                  <div className="mb-6 p-4 bg-[#FF6B6B]/10 rounded-2xl border-2 border-[#FF6B6B]/30">
-                    <div className="flex items-start gap-3">
-                      <Info size={20} className="text-[#FF6B6B] flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-[#3D4852] dark:text-[#E2E8F0] font-medium mb-1">How it works:</p>
-                        <p className="text-[#8B92A0] dark:text-[#8892A0] text-sm">
-                          When you pay an installment, an <span className="text-[#FF6B6B] font-medium">Expense transaction</span> will be automatically created, and the selected account balance will be deducted accordingly.
-                        </p>
+                  {isNewUser && (
+                    <div className="mb-6 p-4 bg-[#FF6B6B]/10 rounded-2xl border-2 border-[#FF6B6B]/30">
+                      <div className="flex items-start gap-3">
+                        <Info size={20} className="text-[#FF6B6B] flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-[#3D4852] dark:text-[#E2E8F0] font-medium mb-1">How it works:</p>
+                          <p className="text-[#8B92A0] dark:text-[#8892A0] text-sm">
+                            When you pay an installment, an <span className="text-[#FF6B6B] font-medium">Expense transaction</span> will be automatically created, and the selected account balance will be deducted accordingly.
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* 2 Column Layout */}
                   <div className="grid grid-cols-2 gap-6">
@@ -1036,7 +1055,7 @@ export function Debts() {
                                 );
                                 setShowPayForm(false);
                                 setPayAmount('');
-                                setPayDate(new Date().toISOString().split('T')[0]);
+                                setPayDate(getLocalISODate());
                                 setPayNote('');
                                 setPayAccount('');
                               } catch (err) {

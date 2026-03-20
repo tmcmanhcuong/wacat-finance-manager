@@ -272,3 +272,10 @@ export const daysUntil = (dateString: string): number => {
   const diff = target.getTime() - now.getTime();
   return Math.round(diff / (1000 * 60 * 60 * 24));
 };
+
+// Get current date string in local timezone (YYYY-MM-DD)
+export const getLocalISODate = (): string => {
+  const now = new Date();
+  const tzOffset = now.getTimezoneOffset() * 60000;
+  return new Date(now.getTime() - tzOffset).toISOString().split('T')[0];
+};

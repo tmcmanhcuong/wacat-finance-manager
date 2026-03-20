@@ -358,7 +358,7 @@ export function Dashboard() {
                         <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color }}></div>
                         <span className="text-[#8B92A0] text-sm">{cat.name}</span>
                       </div>
-                      <span className="text-[#3D4852] text-sm">{formatCurrency(cat.value)}</span>
+                      <span className="text-[#3D4852] dark:text-[#E2E8F0] text-sm">{formatCurrency(cat.value)}</span>
                     </div>
                   ))}
                 </div>

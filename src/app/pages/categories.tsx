@@ -1,5 +1,5 @@
 import { useState, ChangeEvent } from 'react';
-import { Plus, Edit2, Trash2, TrendingUp, TrendingDown, ShoppingCart, Home as HomeIcon, Car, Coffee, Heart, Briefcase, Gift, Smartphone, Zap, Music, Book, Dumbbell, Plane, Loader2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, TrendingUp, TrendingDown, ShoppingCart, Home as HomeIcon, Car, Coffee, Heart, Briefcase, Gift, Smartphone, Zap, Music, Book, Dumbbell, Plane, Loader2, AlertTriangle } from 'lucide-react';
 import { NeumorphicCard, NeumorphicButton, NeumorphicInput } from '../components/neumorphic-card';
 import { useCategories } from '../../hooks/useCategories';
 import { motion } from 'motion/react';
@@ -143,18 +143,19 @@ export function Categories() {
         {/* Category Form */}
         <div className="col-span-1">
           {showForm && (
-            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-              <NeumorphicCard className="p-6 sticky top-8">
-                <h3 className="text-[#3D4852] dark:text-[#E2E8F0] text-xl mb-6">
-                  {editingId ? 'Edit Category' : 'Add New Category'}
-                </h3>
+            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="h-full">
+              <NeumorphicCard className="p-0 sticky top-8 flex flex-col max-h-[calc(100vh-4rem)] overflow-hidden">
+                {/* Header (Pinned) */}
+                <div className="p-6 pb-2 shrink-0 z-10 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-t-[1.5rem]">
+                  <h3 className="text-[#3D4852] dark:text-[#E2E8F0] text-xl">
+                    {editingId ? 'Edit Category' : 'Add New Category'}
+                  </h3>
+                </div>
 
-                {submitError && (
-                  <p className="text-[#FF6B6B] text-sm mb-4 p-3 bg-[#FF6B6B]/10 rounded-xl">{submitError}</p>
-                )}
-
-                {/* Type Selection */}
-                <div className="grid grid-cols-2 gap-3 mb-6">
+                {/* Scrollable Form Content */}
+                <div className="p-6 pt-2 overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-[#CDD2D9] dark:scrollbar-thumb-[#4A5568] scrollbar-track-transparent">
+                  {/* Type Selection */}
+                  <div className="grid grid-cols-2 gap-3 mb-6">
                   <button
                     onClick={() => setCategoryType('income')}
                     className={`py-4 rounded-2xl transition-all min-h-[56px] ${categoryType === 'income' ? 'bg-[#4ECDC4] text-white' : 'bg-[#E0E5EC] dark:bg-[#252C3E] text-[#3D4852] dark:text-[#E2E8F0] shadow-[4px_4px_8px_rgba(163,177,198,0.6),-4px_-4px_8px_rgba(255,255,255,0.6)] dark:shadow-[4px_4px_8px_rgba(14,18,28,0.9),-4px_-4px_8px_rgba(42,49,68,0.5)]'}`}
@@ -233,13 +234,23 @@ export function Categories() {
                     </div>
                   </div>
                 </div>
+                </div>{/* End Scrollable Form Content */}
 
-                <div className="grid grid-cols-2 gap-4">
-                  <NeumorphicButton onClick={resetForm}>Cancel</NeumorphicButton>
-                  <NeumorphicButton variant="primary" onClick={handleSubmit} disabled={isSubmitting}>
-                    {isSubmitting ? <Loader2 size={16} className="inline animate-spin mr-1" /> : null}
-                    {editingId ? 'Update' : 'Create'}
-                  </NeumorphicButton>
+                {/* Footer (Pinned) */}
+                <div className="p-6 pt-4 shrink-0 z-10 bg-[#E0E5EC] dark:bg-[#252C3E] border-t border-[#CDD2D9]/30 dark:border-[#2A3144]/30 rounded-b-[1.5rem]">
+                  {submitError && (
+                    <div className="mb-4 flex items-center gap-3 p-3 bg-[#FF6B6B]/10 rounded-xl border border-[#FF6B6B]/20">
+                      <AlertTriangle size={18} className="text-[#FF6B6B] shrink-0" />
+                      <p className="text-[#FF6B6B] text-sm font-medium">{submitError}</p>
+                    </div>
+                  )}
+                  <div className="grid grid-cols-2 gap-4">
+                    <NeumorphicButton onClick={resetForm}>Cancel</NeumorphicButton>
+                    <NeumorphicButton variant="primary" onClick={handleSubmit} disabled={isSubmitting}>
+                      {isSubmitting ? <Loader2 size={16} className="inline animate-spin mr-1" /> : null}
+                      {editingId ? 'Update' : 'Create'}
+                    </NeumorphicButton>
+                  </div>
                 </div>
               </NeumorphicCard>
             </motion.div>

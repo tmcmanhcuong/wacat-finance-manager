@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { ArrowLeftRight, TrendingUp, TrendingDown, Plus, Loader2, Trash2, ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { NeumorphicCard, NeumorphicButton, NeumorphicInput, NeumorphicSelect } from '../components/neumorphic-card';
-import { formatCurrency } from '../store';
+import { formatCurrency, getLocalISODate } from '../store';
 import { useAccounts } from '../../hooks/useAccounts';
 import { useTransactions } from '../../hooks/useTransactions';
 import { useCategories } from '../../hooks/useCategories';
@@ -19,7 +19,7 @@ export function Transactions() {
   const [categoryId, setCategoryId] = useState('');
   const [fromAccount, setFromAccount] = useState('');
   const [toAccount, setToAccount] = useState('');
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(getLocalISODate());
   const [isInternalTransfer, setIsInternalTransfer] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
@@ -109,7 +109,7 @@ export function Transactions() {
       setCategoryId('');
       setFromAccount('');
       setToAccount('');
-      setDate(new Date().toISOString().split('T')[0]);
+      setDate(getLocalISODate());
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Failed to save transaction');
     } finally {
@@ -436,37 +436,36 @@ export function Transactions() {
                 {/* Smart Page Numbers */}
                 <div className="flex items-center gap-2">
                   {(() => {
-                    const pages: (number | '...')[] = [];
-                    if (totalPages <= 7) {
-                      for (let i = 1; i <= totalPages; i++) pages.push(i);
-                    } else {
-                      pages.push(1);
-                      if (currentPage > 3) pages.push('...');
-                      const start = Math.max(2, currentPage - 1);
-                      const end = Math.min(totalPages - 1, currentPage + 1);
-                      for (let i = start; i <= end; i++) pages.push(i);
-                      if (currentPage < totalPages - 2) pages.push('...');
-                      pages.push(totalPages);
+                    const pages: number[] = [];
+                    // Only display 3 pages centered around current page
+                    let startPage = Math.max(1, currentPage - 1);
+                    let endPage = startPage + 2;
+
+                    // If endPage exceeds totalPages, shift the window back
+                    if (endPage > totalPages) {
+                      endPage = totalPages;
+                      startPage = Math.max(1, endPage - 2);
                     }
-                    return pages.map((p, i) =>
-                      p === '...' ? (
-                        <span key={`ellipsis-${i}`} className="w-10 h-10 flex items-center justify-center text-[#8B92A0] dark:text-[#8892A0]">
-                          …
-                        </span>
-                      ) : (
-                        <button
-                          key={p}
-                          onClick={() => setCurrentPage(p as number)}
-                          className={`w-10 h-10 rounded-xl text-sm font-medium transition-all ${
-                            currentPage === p
-                              ? 'bg-[#6C63FF] text-white shadow-[4px_4px_8px_rgba(108,99,255,0.3),-2px_-2px_4px_rgba(255,255,255,0.2)] dark:shadow-[4px_4px_8px_rgba(108,99,255,0.3),-2px_-2px_4px_rgba(42,49,68,0.5)]'
-                              : 'bg-[#E0E5EC] dark:bg-[#252C3E] text-[#3D4852] dark:text-[#E2E8F0] shadow-[4px_4px_8px_rgba(163,177,198,0.6),-4px_-4px_8px_rgba(255,255,255,0.6)] dark:shadow-[4px_4px_8px_rgba(14,18,28,0.9),-4px_-4px_8px_rgba(42,49,68,0.5)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.4),-2px_-2px_4px_rgba(255,255,255,0.4)] hover:dark:shadow-[2px_2px_4px_rgba(14,18,28,0.9),-2px_-2px_4px_rgba(42,49,68,0.5)]'
-                          }`}
-                        >
-                          {p}
-                        </button>
-                      )
-                    );
+
+                    for (let i = startPage; i <= endPage; i++) {
+                      if (i > 0 && i <= totalPages) {
+                        pages.push(i);
+                      }
+                    }
+
+                    return pages.map(p => (
+                      <button
+                        key={p}
+                        onClick={() => setCurrentPage(p as number)}
+                        className={`w-10 h-10 rounded-xl text-sm font-medium transition-all ${
+                          currentPage === p
+                            ? 'bg-[#6C63FF] text-white shadow-[4px_4px_8px_rgba(108,99,255,0.3),-2px_-2px_4px_rgba(255,255,255,0.2)] dark:shadow-[4px_4px_8px_rgba(108,99,255,0.3),-2px_-2px_4px_rgba(42,49,68,0.5)]'
+                            : 'bg-[#E0E5EC] dark:bg-[#252C3E] text-[#3D4852] dark:text-[#E2E8F0] shadow-[4px_4px_8px_rgba(163,177,198,0.6),-4px_-4px_8px_rgba(255,255,255,0.6)] dark:shadow-[4px_4px_8px_rgba(14,18,28,0.9),-4px_-4px_8px_rgba(42,49,68,0.5)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.4),-2px_-2px_4px_rgba(255,255,255,0.4)] hover:dark:shadow-[2px_2px_4px_rgba(14,18,28,0.9),-2px_-2px_4px_rgba(42,49,68,0.5)]'
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    ));
                   })()}
                 </div>
 

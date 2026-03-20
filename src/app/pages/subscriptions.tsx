@@ -274,10 +274,10 @@ export function Subscriptions() {
           </NeumorphicCard>
         </motion.div>
 
-        {/* By Category */}
+        {/* By Tag */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
           <NeumorphicCard className="p-6">
-            <h3 className="text-[#3D4852] dark:text-[#E2E8F0] text-xl mb-6">By Category</h3>
+            <h3 className="text-[#3D4852] dark:text-[#E2E8F0] text-xl mb-6">By Tag</h3>
             <div className="space-y-4">
               {byTag.length === 0 ? (
                 <p className="text-center text-[#8B92A0] dark:text-[#8892A0] py-8">No data</p>

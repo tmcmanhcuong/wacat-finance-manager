@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useSubscriptions } from './useSubscriptions';
 import { useTransactions } from './useTransactions';
 import type { Subscription } from '../app/types';
+import { getLocalISODate } from '../app/store';
 
 export function useSubscriptionAutomation() {
   const { subscriptions, updateSubscription } = useSubscriptions();
@@ -58,7 +59,8 @@ export function useSubscriptionAutomation() {
         nextDate.setMonth(nextDate.getMonth() + 1);
       }
       
-      const newPaymentDateStr = nextDate.toISOString().split('T')[0];
+      const tzOffset = nextDate.getTimezoneOffset() * 60000;
+      const newPaymentDateStr = new Date(nextDate.getTime() - tzOffset).toISOString().split('T')[0];
 
       // 3. Update subscription
       await updateSubscription(subscription.id, {

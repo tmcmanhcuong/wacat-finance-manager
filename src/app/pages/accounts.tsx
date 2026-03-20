@@ -1,6 +1,6 @@
 import { Wallet, Building2, Smartphone, PiggyBank, ArrowRightLeft, Plus, TrendingUp, TrendingDown, Edit2, Trash2, X, Loader2, type LucideIcon } from 'lucide-react';
 import { NeumorphicCard, NeumorphicButton, NeumorphicInput, NeumorphicSelect } from '../components/neumorphic-card';
-import { formatCurrency, getTotalBalance } from '../store';
+import { formatCurrency, getTotalBalance, getLocalISODate } from '../store';
 import { useAccounts } from '../../hooks/useAccounts';
 import { useTransactions } from '../../hooks/useTransactions';
 import { motion } from 'motion/react';
@@ -103,7 +103,7 @@ export function Accounts() {
         type: 'transfer',
         amount,
         category: 'Other',
-        date: new Date().toISOString().split('T')[0],
+        date: getLocalISODate(),
         fromAccountId: transferFromAccount,
         toAccountId: transferToAccount,
         description: transferNote || `Transfer: ${fromAcc.name} → ${toAcc.name}`,
@@ -653,7 +653,7 @@ export function Accounts() {
             <NeumorphicCard className="p-6">
               <h3 className="text-[#3D4852] dark:text-[#E2E8F0] text-xl mb-6">Recent Account Activity</h3>
               <div className="space-y-4">
-                {transactions.slice(0, 6).map((transaction) => {
+                {transactions.slice(0, 4).map((transaction) => {
                   const account = accounts.find(a => a.id === transaction.accountId);
                   const fromAccount = accounts.find(a => a.id === transaction.fromAccountId);
                   const toAccount = accounts.find(a => a.id === transaction.toAccountId);
