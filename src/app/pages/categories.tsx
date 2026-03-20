@@ -37,22 +37,50 @@ export function Categories() {
   const [selectedIcon, setSelectedIcon] = useState('ShoppingCart');
   const [selectedColor, setSelectedColor] = useState('#FF6B6B');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   const incomeCategories = categories.filter(c => c.type === 'income');
   const expenseCategories = categories.filter(c => c.type === 'expense');
 
+  const handleToggleForm = () => {
+    setShowForm(prev => {
+      if (!prev) setSubmitError('');
+      return !prev;
+    });
+    setEditingId(null);
+    setCategoryName('');
+    setSelectedIcon('ShoppingCart');
+    setSelectedColor('#FF6B6B');
+  };
+
   const handleSubmit = async () => {
-    if (!categoryName.trim()) return;
+    const trimmedName = categoryName.trim();
+    if (!trimmedName) {
+      setSubmitError('Category name is required');
+      return;
+    }
+
+    // Check for duplicates (case-insensitive, exclude current category if editing)
+    const isDuplicate = categories.some(c => 
+      c.name.toLowerCase() === trimmedName.toLowerCase() && c.id !== editingId
+    );
+
+    if (isDuplicate) {
+      setSubmitError(`A category named "${trimmedName}" already exists`);
+      return;
+    }
+
     setIsSubmitting(true);
+    setSubmitError('');
     try {
       if (editingId) {
-        await updateCategory(editingId, { name: categoryName, icon: selectedIcon, color: selectedColor, type: categoryType });
+        await updateCategory(editingId, { name: trimmedName, icon: selectedIcon, color: selectedColor, type: categoryType });
       } else {
-        await addCategory({ name: categoryName, icon: selectedIcon, color: selectedColor, type: categoryType });
+        await addCategory({ name: trimmedName, icon: selectedIcon, color: selectedColor, type: categoryType });
       }
       resetForm();
     } catch (err) {
-      console.error('Failed to save category:', err);
+      setSubmitError(err instanceof Error ? err.message : 'Failed to save category');
     } finally {
       setIsSubmitting(false);
     }
@@ -105,7 +133,7 @@ export function Categories() {
           <h1 className="text-[#3D4852] dark:text-[#E2E8F0] text-3xl mb-2">Categories Management</h1>
           <p className="text-[#8B92A0] dark:text-[#8892A0]">Create and manage your transaction categories</p>
         </div>
-        <NeumorphicButton variant="primary" onClick={() => { resetForm(); setShowForm(!showForm); }}>
+        <NeumorphicButton variant="primary" onClick={handleToggleForm}>
           <Plus size={20} className="inline mr-2" />
           New Category
         </NeumorphicButton>
@@ -120,6 +148,10 @@ export function Categories() {
                 <h3 className="text-[#3D4852] dark:text-[#E2E8F0] text-xl mb-6">
                   {editingId ? 'Edit Category' : 'Add New Category'}
                 </h3>
+
+                {submitError && (
+                  <p className="text-[#FF6B6B] text-sm mb-4 p-3 bg-[#FF6B6B]/10 rounded-xl">{submitError}</p>
+                )}
 
                 {/* Type Selection */}
                 <div className="grid grid-cols-2 gap-3 mb-6">
@@ -245,16 +277,23 @@ export function Categories() {
                             <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ backgroundColor: category.color }}>
                               <IconComp size={28} className="text-white" />
                             </div>
-                            <p className="text-[#3D4852] dark:text-[#E2E8F0] text-lg flex-1">{category.name}</p>
+                            <div className="flex-1">
+                              <p className="text-[#3D4852] dark:text-[#E2E8F0] text-lg">{category.name}</p>
+                              {category.isSystem && (
+                                <span className="text-[10px] uppercase tracking-wider font-bold text-[#6C63FF] bg-[#6C63FF]/10 px-2 py-0.5 rounded-full">System</span>
+                              )}
+                            </div>
                           </div>
-                          <div className="flex gap-2">
-                            <button onClick={() => handleEdit(category)} className="flex-1 py-3 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-xl shadow-[3px_3px_6px_rgba(163,177,198,0.4),-3px_-3px_6px_rgba(255,255,255,0.4)] dark:shadow-[3px_3px_6px_rgba(14,18,28,0.9),-3px_-3px_6px_rgba(42,49,68,0.5)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.3),-2px_-2px_4px_rgba(255,255,255,0.3)] hover:dark:shadow-[2px_2px_4px_rgba(14,18,28,0.9),-2px_-2px_4px_rgba(42,49,68,0.5)] transition-all flex items-center justify-center gap-2 text-[#6C63FF]">
-                              <Edit2 size={16} /><span className="text-sm">Edit</span>
-                            </button>
-                            <button onClick={() => handleDelete(category.id)} className="flex-1 py-3 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-xl shadow-[3px_3px_6px_rgba(163,177,198,0.4),-3px_-3px_6px_rgba(255,255,255,0.4)] dark:shadow-[3px_3px_6px_rgba(14,18,28,0.9),-3px_-3px_6px_rgba(42,49,68,0.5)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.3),-2px_-2px_4px_rgba(255,255,255,0.3)] hover:dark:shadow-[2px_2px_4px_rgba(14,18,28,0.9),-2px_-2px_4px_rgba(42,49,68,0.5)] transition-all flex items-center justify-center gap-2 text-[#FF6B6B]">
-                              <Trash2 size={16} /><span className="text-sm">Delete</span>
-                            </button>
-                          </div>
+                          {!category.isSystem && (
+                            <div className="flex gap-2">
+                              <button onClick={() => handleEdit(category)} className="flex-1 py-3 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-xl shadow-[3px_3px_6px_rgba(163,177,198,0.4),-3px_-3px_6px_rgba(255,255,255,0.4)] dark:shadow-[3px_3px_6px_rgba(14,18,28,0.9),-3px_-3px_6px_rgba(42,49,68,0.5)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.3),-2px_-2px_4px_rgba(255,255,255,0.3)] hover:dark:shadow-[2px_2px_4px_rgba(14,18,28,0.9),-2px_-2px_4px_rgba(42,49,68,0.5)] transition-all flex items-center justify-center gap-2 text-[#6C63FF]">
+                                <Edit2 size={16} /><span className="text-sm">Edit</span>
+                              </button>
+                              <button onClick={() => handleDelete(category.id)} className="flex-1 py-3 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-xl shadow-[3px_3px_6px_rgba(163,177,198,0.4),-3px_-3px_6px_rgba(255,255,255,0.4)] dark:shadow-[3px_3px_6px_rgba(14,18,28,0.9),-3px_-3px_6px_rgba(42,49,68,0.5)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.3),-2px_-2px_4px_rgba(255,255,255,0.3)] hover:dark:shadow-[2px_2px_4px_rgba(14,18,28,0.9),-2px_-2px_4px_rgba(42,49,68,0.5)] transition-all flex items-center justify-center gap-2 text-[#FF6B6B]">
+                                <Trash2 size={16} /><span className="text-sm">Delete</span>
+                              </button>
+                            </div>
+                          )}
                         </motion.div>
                       );
                     })}
@@ -291,16 +330,23 @@ export function Categories() {
                             <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ backgroundColor: category.color }}>
                               <IconComp size={28} className="text-white" />
                             </div>
-                            <p className="text-[#3D4852] dark:text-[#E2E8F0] text-lg flex-1">{category.name}</p>
+                            <div className="flex-1">
+                              <p className="text-[#3D4852] dark:text-[#E2E8F0] text-lg">{category.name}</p>
+                              {category.isSystem && (
+                                <span className="text-[10px] uppercase tracking-wider font-bold text-[#6C63FF] bg-[#6C63FF]/10 px-2 py-0.5 rounded-full">System</span>
+                              )}
+                            </div>
                           </div>
-                          <div className="flex gap-2">
-                            <button onClick={() => handleEdit(category)} className="flex-1 py-3 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-xl shadow-[3px_3px_6px_rgba(163,177,198,0.4),-3px_-3px_6px_rgba(255,255,255,0.4)] dark:shadow-[3px_3px_6px_rgba(14,18,28,0.9),-3px_-3px_6px_rgba(42,49,68,0.5)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.3),-2px_-2px_4px_rgba(255,255,255,0.3)] hover:dark:shadow-[2px_2px_4px_rgba(14,18,28,0.9),-2px_-2px_4px_rgba(42,49,68,0.5)] transition-all flex items-center justify-center gap-2 text-[#6C63FF]">
-                              <Edit2 size={16} /><span className="text-sm">Edit</span>
-                            </button>
-                            <button onClick={() => handleDelete(category.id)} className="flex-1 py-3 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-xl shadow-[3px_3px_6px_rgba(163,177,198,0.4),-3px_-3px_6px_rgba(255,255,255,0.4)] dark:shadow-[3px_3px_6px_rgba(14,18,28,0.9),-3px_-3px_6px_rgba(42,49,68,0.5)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.3),-2px_-2px_4px_rgba(255,255,255,0.3)] hover:dark:shadow-[2px_2px_4px_rgba(14,18,28,0.9),-2px_-2px_4px_rgba(42,49,68,0.5)] transition-all flex items-center justify-center gap-2 text-[#FF6B6B]">
-                              <Trash2 size={16} /><span className="text-sm">Delete</span>
-                            </button>
-                          </div>
+                          {!category.isSystem && (
+                            <div className="flex gap-2">
+                              <button onClick={() => handleEdit(category)} className="flex-1 py-3 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-xl shadow-[3px_3px_6px_rgba(163,177,198,0.4),-3px_-3px_6px_rgba(255,255,255,0.4)] dark:shadow-[3px_3px_6px_rgba(14,18,28,0.9),-3px_-3px_6px_rgba(42,49,68,0.5)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.3),-2px_-2px_4px_rgba(255,255,255,0.3)] hover:dark:shadow-[2px_2px_4px_rgba(14,18,28,0.9),-2px_-2px_4px_rgba(42,49,68,0.5)] transition-all flex items-center justify-center gap-2 text-[#6C63FF]">
+                                <Edit2 size={16} /><span className="text-sm">Edit</span>
+                              </button>
+                              <button onClick={() => handleDelete(category.id)} className="flex-1 py-3 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-xl shadow-[3px_3px_6px_rgba(163,177,198,0.4),-3px_-3px_6px_rgba(255,255,255,0.4)] dark:shadow-[3px_3px_6px_rgba(14,18,28,0.9),-3px_-3px_6px_rgba(42,49,68,0.5)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.3),-2px_-2px_4px_rgba(255,255,255,0.3)] hover:dark:shadow-[2px_2px_4px_rgba(14,18,28,0.9),-2px_-2px_4px_rgba(42,49,68,0.5)] transition-all flex items-center justify-center gap-2 text-[#FF6B6B]">
+                                <Trash2 size={16} /><span className="text-sm">Delete</span>
+                              </button>
+                            </div>
+                          )}
                         </motion.div>
                       );
                     })}

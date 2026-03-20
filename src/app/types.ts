@@ -24,6 +24,7 @@ export interface Category {
   icon: string;
   type: 'income' | 'expense';
   color: string;
+  isSystem?: boolean;
 }
 
 export interface PaymentHistory {

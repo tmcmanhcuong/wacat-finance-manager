@@ -12,11 +12,27 @@ export function useSubscriptionAutomation() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    return subscriptions.filter(sub => {
-      const paymentDate = new Date(sub.nextPaymentDate);
-      paymentDate.setHours(0, 0, 0, 0);
-      return paymentDate.getTime() <= today.getTime();
-    });
+    const threeDaysFromNow = new Date(today);
+    threeDaysFromNow.setDate(today.getDate() + 3);
+
+    return subscriptions
+      .filter(sub => {
+        const paymentDate = new Date(sub.nextPaymentDate);
+        paymentDate.setHours(0, 0, 0, 0);
+        // Show if due today, overdue, OR due within 3 days
+        return paymentDate.getTime() <= threeDaysFromNow.getTime();
+      })
+      .map(sub => {
+        const paymentDate = new Date(sub.nextPaymentDate);
+        paymentDate.setHours(0, 0, 0, 0);
+        
+        const isDueOrOverdue = paymentDate.getTime() <= today.getTime();
+        
+        return {
+          ...sub,
+          status: isDueOrOverdue ? 'due' : 'upcoming' as 'due' | 'upcoming'
+        };
+      });
   }, [subscriptions]);
 
   const confirmPayment = async (subscription: Subscription, accountId: string) => {
@@ -26,10 +42,10 @@ export function useSubscriptionAutomation() {
       await addTransaction({
         type: 'expense',
         amount: subscription.amount,
-        category: subscription.category,
+        category: 'Subscription',
         date: subscription.nextPaymentDate,
         accountId: accountId,
-        description: `Subscription: ${subscription.name}`,
+        description: `${subscription.name} (${subscription.category})`,
       });
 
       // 2. Calculate next payment date

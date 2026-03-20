@@ -31,6 +31,7 @@ export function Transactions() {
   const [filterCategory, setFilterCategory] = useState('all');
   const [filterAccount, setFilterAccount] = useState('all');
   const [filterPeriod, setFilterPeriod] = useState('all');
+  const [filterSearch, setFilterSearch] = useState('');
   const [customStartDate, setCustomStartDate] = useState('');
   const [customEndDate, setCustomEndDate] = useState('');
 
@@ -42,23 +43,64 @@ export function Transactions() {
     isInternalTransfer ? false : c.type === transactionType
   );
 
+  const handleToggleForm = () => {
+    setShowForm(prev => {
+      if (!prev) setSubmitError('');
+      return !prev;
+    });
+  };
+
   const handleSubmit = async () => {
-    if (!amount || Number(amount) <= 0) return;
-    if (isInternalTransfer && (!fromAccount || !toAccount)) return;
-    if (!isInternalTransfer && !fromAccount) return;
+    const amountVal = Number(amount);
+    const finalType = isInternalTransfer ? 'transfer' : transactionType;
+    const finalDescription = description.trim() || (isInternalTransfer ? 'Transfer' : transactionType.charAt(0).toUpperCase() + transactionType.slice(1));
+
+    if (!amount || amountVal <= 0) {
+      setSubmitError('Amount must be greater than 0');
+      return;
+    }
+
+    if (!date) {
+      setSubmitError('Date is required');
+      return;
+    }
+
+    if (isInternalTransfer) {
+      if (!fromAccount) {
+        setSubmitError('From Account is required for transfers');
+        return;
+      }
+      if (!toAccount) {
+        setSubmitError('To Account is required for transfers');
+        return;
+      }
+      if (fromAccount === toAccount) {
+        setSubmitError('From and To accounts must be different');
+        return;
+      }
+    } else {
+      if (!fromAccount) {
+        setSubmitError('Account is required');
+        return;
+      }
+      if (!categoryId) {
+        setSubmitError('Category is required');
+        return;
+      }
+    }
 
     setIsSubmitting(true);
     setSubmitError('');
     try {
       await addTransaction({
-        type: isInternalTransfer ? 'transfer' : transactionType,
-        amount: Number(amount),
+        type: finalType,
+        amount: amountVal,
         category: isInternalTransfer ? 'Other' : categoryId,
         date,
         accountId: !isInternalTransfer ? fromAccount : undefined,
         fromAccountId: isInternalTransfer ? fromAccount : undefined,
         toAccountId: isInternalTransfer ? toAccount : undefined,
-        description: description || (isInternalTransfer ? 'Transfer' : transactionType),
+        description: finalDescription,
       });
       // Reset form
       setShowForm(false);
@@ -78,12 +120,27 @@ export function Transactions() {
   const filteredTransactions = useMemo(() => {
     const now = new Date();
     return transactions.filter(t => {
+      // 1. Basic filters
       if (filterType !== 'all' && t.type !== filterType) return false;
       if (filterCategory !== 'all' && t.category !== filterCategory) return false;
       if (filterAccount !== 'all') {
         const match = t.accountId === filterAccount || t.fromAccountId === filterAccount || t.toAccountId === filterAccount;
         if (!match) return false;
       }
+
+      // 2. Search filter (Description or Category name)
+      if (filterSearch) {
+        const searchLower = filterSearch.toLowerCase();
+        const descMatch = (t.description || '').toLowerCase().includes(searchLower);
+        
+        // Find category name to match
+        const catName = categories.find(c => c.id === t.category)?.name || t.category || '';
+        const catMatch = catName.toLowerCase().includes(searchLower);
+        
+        if (!descMatch && !catMatch) return false;
+      }
+
+      // 3. Period filter
       if (filterPeriod !== 'all') {
         const d = new Date(t.date);
         if (filterPeriod === 'daily') {
@@ -100,7 +157,7 @@ export function Transactions() {
       }
       return true;
     });
-  }, [transactions, filterType, filterCategory, filterAccount, filterPeriod, customStartDate, customEndDate]);
+  }, [transactions, categories, filterType, filterCategory, filterAccount, filterPeriod, filterSearch, customStartDate, customEndDate]);
 
   const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
   const currentItems = filteredTransactions.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -126,7 +183,7 @@ export function Transactions() {
           <h1 className="text-[#3D4852] dark:text-[#E2E8F0] text-3xl mb-2">Transactions</h1>
           <p className="text-[#8B92A0] dark:text-[#8892A0]">Manage your income, expenses and transfers</p>
         </div>
-        <NeumorphicButton variant="primary" onClick={() => setShowForm(!showForm)}>
+        <NeumorphicButton variant="primary" onClick={handleToggleForm}>
           <Plus size={20} className="inline mr-2" />
           New Transaction
         </NeumorphicButton>
@@ -253,7 +310,13 @@ export function Transactions() {
         <div className={showForm ? 'col-span-2' : 'col-span-3'}>
           {/* Filters */}
           <NeumorphicCard variant="extruded" className="p-6 mb-6">
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-5 gap-4">
+              <NeumorphicInput 
+                placeholder="Search..." 
+                value={filterSearch} 
+                onChange={e => { setFilterSearch(e.target.value); setCurrentPage(1); }} 
+              />
+
               <NeumorphicSelect value={filterType} onChange={e => { setFilterType(e.target.value as 'all' | 'income' | 'expense' | 'transfer'); setCurrentPage(1); }}>
                 <option value="all">All Types</option>
                 <option value="income">Income</option>
@@ -305,7 +368,7 @@ export function Transactions() {
               <div className="space-y-2">
                 {currentItems.map((transaction) => {
                   const account = accounts.find(a => a.id === transaction.accountId);
-                  const cat = categories.find(c => c.id === transaction.category);
+                  const cat = categories.find(c => c.id === transaction.category || c.name === transaction.category);
                   const fromAcc = accounts.find(a => a.id === transaction.fromAccountId);
                   const toAcc = accounts.find(a => a.id === transaction.toAccountId);
 
@@ -324,7 +387,7 @@ export function Transactions() {
                         <div>
                           <p className="text-[#3D4852] dark:text-[#E2E8F0] mb-1">{transaction.description || 'No description'}</p>
                           <div className="flex items-center gap-2 text-[#8B92A0] dark:text-[#8892A0] text-sm flex-wrap">
-                            <span>{cat?.name || (transaction.type === 'transfer' ? 'Transfer' : '—')}</span>
+                            <span>{cat?.name || transaction.category || '—'}</span>
                             <span>•</span>
                             <span>
                               {transaction.type === 'transfer'

@@ -263,8 +263,12 @@ export const formatCurrency = (amount: number): string => {
 
 // Calculate days until date
 export const daysUntil = (dateString: string): number => {
-  const now = new Date('2026-03-10');
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  
   const target = new Date(dateString);
+  target.setHours(0, 0, 0, 0);
+  
   const diff = target.getTime() - now.getTime();
-  return Math.ceil(diff / (1000 * 60 * 60 * 24));
+  return Math.round(diff / (1000 * 60 * 60 * 24));
 };

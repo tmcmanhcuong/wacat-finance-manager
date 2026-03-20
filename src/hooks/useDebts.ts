@@ -72,7 +72,7 @@ export function useDebts() {
                 category: 'debt-collection',
                 date: receiveDate,
                 accountId: receiveAccount,
-                description: `Received from ${debt.person} - ${debt.description}${receiveNote ? ` (${receiveNote})` : ''}`,
+                description: `${debt.person} - ${debt.description}${receiveNote ? ` (${receiveNote})` : ''}`,
             });
 
             // 2. Update account balance
@@ -135,7 +135,7 @@ export function useDebts() {
                 category: 'debt-payment',
                 date: payDate,
                 accountId: payAccount,
-                description: `Payment to ${debt.person} - ${debt.description}${payNote ? ` (${payNote})` : ''}`,
+                description: `${debt.person} - ${debt.description}${payNote ? ` (${payNote})` : ''}`,
             });
 
             // 2. Update account balance (subtract)

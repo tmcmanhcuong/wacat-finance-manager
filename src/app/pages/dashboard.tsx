@@ -119,25 +119,38 @@ export function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8 space-y-4"
         >
-          {pendingPayments.map(sub => (
-            <NeumorphicCard key={sub.id} variant="extruded" className="p-4 border-l-4 border-[#FFC75F] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-[#FFC75F]/20 rounded-full flex items-center justify-center text-[#FFC75F] flex-shrink-0">
-                  <Cat size={20} />
+          {pendingPayments.map(sub => {
+            const isDue = sub.status === 'due';
+            const accentColor = isDue ? '#FF6B6B' : '#FFC75F';
+            const accentBg = isDue ? 'bg-[#FF6B6B]/10' : 'bg-[#FFC75F]/10';
+            const accentBorder = isDue ? 'border-[#FF6B6B]' : 'border-[#FFC75F]';
+            const accentBtn = isDue ? 'bg-[#FF6B6B]' : 'bg-[#FFC75F]';
+            const accentShadow = isDue ? 'shadow-[3px_3px_6px_rgba(255,107,107,0.3)]' : 'shadow-[3px_3px_6px_rgba(255,199,95,0.3)]';
+
+            return (
+              <NeumorphicCard key={sub.id} variant="extruded" className={`p-4 border-l-4 ${accentBorder} flex flex-col sm:flex-row sm:items-center justify-between gap-4`}>
+                <div className="flex items-center gap-4">
+                  <div className={`w-10 h-10 ${accentBg} rounded-full flex items-center justify-center flex-shrink-0`}>
+                    <Cat size={20} style={{ color: accentColor }} />
+                  </div>
+                  <div>
+                    <h3 className="text-[#3D4852] dark:text-[#E2E8F0] font-medium">
+                      {isDue ? 'Due/Overdue Payment: ' : 'Upcoming Payment: '} {sub.name}
+                    </h3>
+                    <p className="text-[#8B92A0] text-sm md:text-base">
+                      {isDue ? 'Due for ' : 'Coming soon: '} {formatCurrency(sub.amount)} on {new Date(sub.nextPaymentDate).toLocaleDateString('vi-VN')}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-[#3D4852] dark:text-[#E2E8F0] font-medium">Pending Payment: {sub.name}</h3>
-                  <p className="text-[#8B92A0] text-sm md:text-base">Due for {formatCurrency(sub.amount)} on {sub.nextPaymentDate}</p>
-                </div>
-              </div>
-              <button 
-                className="px-4 py-2 bg-[#FFC75F] text-white rounded-lg shadow-[3px_3px_6px_rgba(255,199,95,0.3)] hover:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.1)] transition-all font-medium whitespace-nowrap"
-                onClick={() => setSelectedPendingSub(sub)}
-              >
-                Confirm Payment
-              </button>
-            </NeumorphicCard>
-          ))}
+                <button 
+                  className={`px-4 py-2 ${accentBtn} text-white rounded-lg ${accentShadow} hover:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.1)] transition-all font-medium whitespace-nowrap`}
+                  onClick={() => setSelectedPendingSub(sub as any)}
+                >
+                  Confirm Payment
+                </button>
+              </NeumorphicCard>
+            );
+          })}
         </motion.div>
       )}
 

@@ -1,4 +1,4 @@
-import { TrendingUp, TrendingDown, User, CreditCard, Plus, Calendar, X, ShoppingCart, Clock, Info } from 'lucide-react';
+import { TrendingUp, TrendingDown, User, CreditCard, Plus, Calendar, X, ShoppingCart, Clock, Info, Loader2, AlertCircle } from 'lucide-react';
 import { NeumorphicCard, NeumorphicButton, NeumorphicInput, NeumorphicSelect } from '../components/neumorphic-card';
 import { formatCurrency, daysUntil } from '../store';
 import { useDebts } from '../../hooks/useDebts';
@@ -15,6 +15,8 @@ export function Debts() {
   const [paidAmount, setPaidAmount] = useState('');
   const [totalAmount, setTotalAmount] = useState('');
   const [dueDate, setDueDate] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Mark as Received form state
   const [showReceiveForm, setShowReceiveForm] = useState(false);
@@ -35,18 +37,42 @@ export function Debts() {
   const { debts, addDebt, markAsReceived, payInstallment } = useDebts();
   const { accounts } = useAccounts();
 
-  // loading state unused but computed if needed
+  const handleOpenForm = () => {
+    setSubmitError(null);
+    setShowForm(true);
+  };
+
+  const handleCloseForm = () => {
+    setShowForm(false);
+    setSubmitError(null);
+  };
 
   const handleSubmit = async () => {
-    if (!person || !totalAmount) return;
+    const trimmedPerson = person.trim();
+    const amountVal = Number(totalAmount);
+    const dateVal = dueDate || new Date().toISOString().split('T')[0];
+
+    if (!trimmedPerson) {
+      setSubmitError('Person/Store name is required');
+      return;
+    }
+
+    if (!totalAmount || amountVal <= 0) {
+      setSubmitError('Total amount must be greater than 0');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitError(null);
+
     try {
       await addDebt({
         type: debtType,
-        person,
+        person: trimmedPerson,
         description,
         amount: Number(paidAmount) || 0,
-        totalAmount: Number(totalAmount),
-        dueDate: dueDate || undefined,
+        totalAmount: amountVal,
+        dueDate: dateVal,
       });
       setShowForm(false);
       setPerson('');
@@ -56,7 +82,9 @@ export function Debts() {
       setDueDate('');
       setDebtType('lent');
     } catch (err) {
-      console.error('Failed to add debt:', err);
+      setSubmitError(err instanceof Error ? err.message : 'Failed to add debt');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -100,7 +128,7 @@ export function Debts() {
           <h1 className="text-[#3D4852] dark:text-[#E2E8F0] text-3xl mb-2">Debts</h1>
           <p className="text-[#8B92A0] dark:text-[#8892A0]">Track money lent, borrowed, and installment payments</p>
         </div>
-        <NeumorphicButton variant="primary" onClick={() => setShowForm(true)}>
+        <NeumorphicButton variant="primary" onClick={handleOpenForm}>
           <Plus size={20} className="inline mr-2" />
           Add Debt/Installment
         </NeumorphicButton>
@@ -308,14 +336,12 @@ export function Debts() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                      <NeumorphicButton size="sm" onClick={() => {
-                        setSelectedBorrowedDebt(debt);
-                        setShowPayForm(true);
-                      }}>
-                        Pay Installment
-                      </NeumorphicButton>
-                    </div>
+                    <NeumorphicButton size="sm" className="w-full" onClick={() => {
+                      setSelectedBorrowedDebt(debt);
+                      setShowPayForm(true);
+                    }}>
+                      Pay Installment
+                    </NeumorphicButton>
                   </div>
                 );
               })}
@@ -342,12 +368,19 @@ export function Debts() {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-[#3D4852] dark:text-[#E2E8F0] text-2xl">Add Debt/Installment</h3>
                 <button
-                  onClick={() => setShowForm(false)}
+                  onClick={handleCloseForm}
                   className="w-10 h-10 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-xl shadow-[4px_4px_8px_rgba(163,177,198,0.4),-4px_-4px_8px_rgba(255,255,255,0.4)] dark:shadow-[4px_4px_8px_rgba(14,18,28,0.9),-4px_-4px_8px_rgba(42,49,68,0.5)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.3),-2px_-2px_4px_rgba(255,255,255,0.3)] hover:dark:shadow-[2px_2px_4px_rgba(14,18,28,0.9),-2px_-2px_4px_rgba(42,49,68,0.5)] flex items-center justify-center transition-all"
                 >
                   <X size={20} className="text-[#8B92A0] dark:text-[#8892A0]" />
                 </button>
               </div>
+
+              {submitError && (
+                <div className="mb-4 p-4 bg-[#FF6B6B]/10 rounded-2xl border-2 border-[#FF6B6B]/30 flex items-center gap-3">
+                  <AlertCircle size={20} className="text-[#FF6B6B] shrink-0" />
+                  <p className="text-[#FF6B6B] text-sm font-medium">{submitError}</p>
+                </div>
+              )}
 
               {/* Type Selection */}
               <div className="mb-4">
@@ -494,10 +527,11 @@ export function Debts() {
 
               {/* Action Buttons */}
               <div className="grid grid-cols-2 gap-4">
-                <NeumorphicButton onClick={() => setShowForm(false)}>
+                <NeumorphicButton onClick={handleCloseForm}>
                   Cancel
                 </NeumorphicButton>
-                <NeumorphicButton variant="primary" onClick={handleSubmit}>
+                <NeumorphicButton variant="primary" onClick={handleSubmit} disabled={isSubmitting}>
+                  {isSubmitting ? <Loader2 size={18} className="inline animate-spin mr-2" /> : null}
                   Add {debtTypeConfig[debtType].label}
                 </NeumorphicButton>
               </div>
@@ -782,7 +816,7 @@ export function Debts() {
                                 .map((payment) => (
                                   <div
                                     key={payment.id}
-                                    className="flex items-start gap-3 p-3 bg-white/50 rounded-xl"
+                                    className="flex items-start gap-3 p-3 bg-white/50 dark:bg-[#1E2532] rounded-xl"
                                   >
                                     <div className="w-10 h-10 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-xl shadow-[inset_2px_2px_4px_rgba(163,177,198,0.4),inset_-2px_-2px_4px_rgba(255,255,255,0.4)] dark:shadow-[inset_2px_2px_4px_rgba(14,18,28,0.9),inset_-2px_-2px_4px_rgba(42,49,68,0.5)] flex items-center justify-center flex-shrink-0">
                                       <Clock size={16} className="text-[#4ECDC4]" />
@@ -1102,8 +1136,8 @@ export function Debts() {
                       {selectedBorrowedDebt.paymentHistory && selectedBorrowedDebt.paymentHistory.length > 0 && (
                         <div>
                           <div className="flex items-center justify-between mb-3">
-                            <label className="block text-[#3D4852]">Payment History</label>
-                            <span className="text-[#8B92A0] text-sm">
+                            <label className="block text-[#3D4852] dark:text-[#E2E8F0]">Payment History</label>
+                            <span className="text-[#8B92A0] dark:text-[#8892A0] text-sm">
                               {selectedBorrowedDebt.paymentHistory.length} payment{selectedBorrowedDebt.paymentHistory.length > 1 ? 's' : ''}
                             </span>
                           </div>
@@ -1112,12 +1146,12 @@ export function Debts() {
                             {/* Summary */}
                             <div className="grid grid-cols-2 gap-4 mb-4 pb-4 border-b border-[#CDD2D9]/30 dark:border-[#2A3144]/30">
                               <div>
-                                <p className="text-[#8B92A0] text-sm mb-1">Total Paid</p>
+                                <p className="text-[#8B92A0] dark:text-[#8892A0] text-sm mb-1">Total Paid</p>
                                 <p className="text-[#4ECDC4] text-lg font-medium">{formatCurrency(selectedBorrowedDebt.amount)}</p>
                               </div>
                               <div>
-                                <p className="text-[#8B92A0] text-sm mb-1">Number of Payments</p>
-                                <p className="text-[#3D4852] text-lg font-medium">{selectedBorrowedDebt.paymentHistory.length} times</p>
+                                <p className="text-[#8B92A0] dark:text-[#8892A0] text-sm mb-1">Number of Payments</p>
+                                <p className="text-[#3D4852] dark:text-[#E2E8F0] text-lg font-medium">{selectedBorrowedDebt.paymentHistory.length} times</p>
                               </div>
                             </div>
 
@@ -1128,7 +1162,7 @@ export function Debts() {
                                 .map((payment) => (
                                   <div
                                     key={payment.id}
-                                    className="flex items-start gap-3 p-3 bg-white/50 rounded-xl"
+                                    className="flex items-start gap-3 p-3 bg-white/50 dark:bg-[#1E2532] rounded-xl"
                                   >
                                     <div className="w-10 h-10 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-xl shadow-[inset_2px_2px_4px_rgba(163,177,198,0.4),inset_-2px_-2px_4px_rgba(255,255,255,0.4)] dark:shadow-[inset_2px_2px_4px_rgba(14,18,28,0.9),inset_-2px_-2px_4px_rgba(42,49,68,0.5)] flex items-center justify-center flex-shrink-0">
                                       <Clock size={16} className="text-[#4ECDC4]" />
@@ -1138,11 +1172,11 @@ export function Debts() {
                                         <p className="text-[#4ECDC4] font-medium">
                                           {formatCurrency(payment.amount)}
                                         </p>
-                                        <span className="text-[#8B92A0] text-sm">
+                                        <span className="text-[#8B92A0] dark:text-[#8892A0] text-sm">
                                           {payment.progressAtTime}%
                                         </span>
                                       </div>
-                                      <p className="text-[#8B92A0] text-sm mb-1">
+                                      <p className="text-[#8B92A0] dark:text-[#8892A0] text-sm mb-1">
                                         {new Date(payment.date).toLocaleDateString('vi-VN', {
                                           day: '2-digit',
                                           month: '2-digit',
@@ -1150,7 +1184,7 @@ export function Debts() {
                                         })}
                                       </p>
                                       {payment.note && (
-                                        <p className="text-[#8B92A0] text-sm italic">
+                                        <p className="text-[#8B92A0] dark:text-[#8892A0] text-sm italic">
                                           "{payment.note}"
                                         </p>
                                       )}
@@ -1165,9 +1199,9 @@ export function Debts() {
                       {/* Empty State for No History */}
                       {(!selectedBorrowedDebt.paymentHistory || selectedBorrowedDebt.paymentHistory.length === 0) && (
                         <div className="p-8 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-2xl shadow-[inset_2px_2px_4px_rgba(163,177,198,0.4),inset_-2px_-2px_4px_rgba(255,255,255,0.4)] dark:shadow-[inset_2px_2px_4px_rgba(14,18,28,0.9),inset_-2px_-2px_4px_rgba(42,49,68,0.5)] text-center">
-                          <Calendar size={40} className="text-[#8B92A0] mx-auto mb-3" />
-                          <p className="text-[#8B92A0]">No payment history yet</p>
-                          <p className="text-[#8B92A0] text-sm">This will be the first payment</p>
+                          <Calendar size={40} className="text-[#8B92A0] dark:text-[#8892A0] mx-auto mb-3" />
+                          <p className="text-[#8B92A0] dark:text-[#8892A0]">No payment history yet</p>
+                          <p className="text-[#8B92A0] dark:text-[#8892A0] text-sm">This will be the first payment</p>
                         </div>
                       )}
                     </div>

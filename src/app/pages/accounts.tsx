@@ -27,7 +27,8 @@ export function Accounts() {
   const [newAccountBalance, setNewAccountBalance] = useState('');
   const [newAccountColor, setNewAccountColor] = useState('#FF6B6B');
   const [newAccountIcon, setNewAccountIcon] = useState('Wallet');
-  // const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   // Transfer form state
   const [transferFromAccount, setTransferFromAccount] = useState('');
@@ -46,11 +47,33 @@ export function Accounts() {
     color: account.color,
   }));
 
+  const handleOpenForm = () => {
+    setSubmitError('');
+    setShowForm(true);
+  };
+
+  const handleCloseForm = () => {
+    setShowForm(false);
+    setSubmitError('');
+  };
+
   const handleSubmit = async () => {
-    if (!newAccountName || !newAccountBalance) return;
+    const trimmedName = newAccountName.trim();
+    if (!trimmedName) {
+      setSubmitError('Account name is required');
+      return;
+    }
+    
+    if (newAccountBalance === '' || isNaN(Number(newAccountBalance))) {
+      setSubmitError('Initial balance is required');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitError('');
     try {
       await addAccount({
-        name: newAccountName,
+        name: trimmedName,
         balance: Number(newAccountBalance),
         color: newAccountColor,
         icon: newAccountIcon,
@@ -61,7 +84,9 @@ export function Accounts() {
       setNewAccountColor('#FF6B6B');
       setNewAccountIcon('Wallet');
     } catch (err) {
-      console.error('Failed to create account:', err);
+      setSubmitError(err instanceof Error ? err.message : 'Failed to create account');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -135,7 +160,7 @@ export function Accounts() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center"
-          onClick={() => setShowForm(false)}
+          onClick={handleCloseForm}
         >
           <motion.div
             initial={{ scale: 0.9, y: 20 }}
@@ -145,6 +170,15 @@ export function Accounts() {
           >
             <NeumorphicCard className="p-6">
               <h3 className="text-[#3D4852] dark:text-[#E2E8F0] text-2xl mb-6">Add New Account</h3>
+
+              {submitError && (
+                <div className="mb-4 p-4 bg-[#FF6B6B]/10 rounded-2xl border-2 border-[#FF6B6B]/30 flex items-center gap-3">
+                  <div className="w-8 h-8 bg-[#FF6B6B]/20 rounded-lg flex items-center justify-center">
+                    <X size={16} className="text-[#FF6B6B]" />
+                  </div>
+                  <p className="text-[#FF6B6B] text-sm font-medium">{submitError}</p>
+                </div>
+              )}
 
               {/* Account Name */}
               <div className="mb-6">
@@ -230,14 +264,16 @@ export function Accounts() {
               {/* Action Buttons */}
               <div className="grid grid-cols-2 gap-4">
                 <NeumorphicButton
-                  onClick={() => setShowForm(false)}
+                  onClick={handleCloseForm}
                 >
                   Cancel
                 </NeumorphicButton>
                 <NeumorphicButton
                   variant="primary"
                   onClick={handleSubmit}
+                  disabled={isSubmitting}
                 >
+                  {isSubmitting ? <Loader2 size={18} className="inline animate-spin mr-2" /> : null}
                   Save Account
                 </NeumorphicButton>
               </div>
@@ -492,7 +528,7 @@ export function Accounts() {
           <h1 className="text-[#3D4852] dark:text-[#E2E8F0] text-3xl mb-2">My Accounts</h1>
           <p className="text-[#8B92A0] dark:text-[#8892A0]">Manage your wallets and bank accounts</p>
         </div>
-        <NeumorphicButton variant="primary" onClick={() => setShowForm(true)}>
+        <NeumorphicButton variant="primary" onClick={handleOpenForm}>
           <Plus size={20} className="inline mr-2" />
           Add Account
         </NeumorphicButton>

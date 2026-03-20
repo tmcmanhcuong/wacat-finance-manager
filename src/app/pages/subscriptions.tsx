@@ -17,7 +17,7 @@ const COLOR_OPTIONS = [
   { label: 'Orange', value: '#FF9500' },
   { label: 'Pink', value: '#FFB6B9' },
 ];
-const CATEGORIES = ['Entertainment', 'Productivity', 'Work', 'Health', 'Education', 'Other'];
+const SUBSCRIPTION_TAGS = ['Entertainment', 'Productivity', 'Work', 'Health', 'Education', 'Other'];
 
 export function Subscriptions() {
   const { subscriptions, loading, addSubscription, deleteSubscription } = useSubscriptions();
@@ -28,9 +28,10 @@ export function Subscriptions() {
   const [subDate, setSubDate] = useState('');
   const [subIcon, setSubIcon] = useState('Music');
   const [subColor, setSubColor] = useState('#6C63FF');
-  const [subCategory, setSubCategory] = useState('Entertainment');
+  const [subTag, setSubTag] = useState('Entertainment');
   const [subBillingCycle, setSubBillingCycle] = useState<'monthly'|'yearly'>('monthly');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const totalMonthly = useMemo(() => subscriptions.reduce((s, sub) => s + (sub.billingCycle === 'yearly' ? sub.amount / 12 : sub.amount), 0), [subscriptions]);
   const totalYearly = useMemo(() => subscriptions.reduce((s, sub) => s + (sub.billingCycle === 'yearly' ? sub.amount : sub.amount * 12), 0), [subscriptions]);
@@ -47,8 +48,8 @@ export function Subscriptions() {
     return subscriptions.reduce((max, s) => s.amount > max.amount ? s : max, subscriptions[0]);
   }, [subscriptions]);
 
-  // By category breakdown
-  const byCategory = useMemo(() => {
+  // By tag breakdown
+  const byTag = useMemo(() => {
     const map: Record<string, number> = {};
     subscriptions.forEach(s => {
       const monthlyAmount = s.billingCycle === 'yearly' ? s.amount / 12 : s.amount;
@@ -66,20 +67,31 @@ export function Subscriptions() {
   const handleSubmit = async () => {
     if (!subName || !subAmount || !subDate) return;
     setIsSubmitting(true);
+    setSubmitError(null);
     try {
+      // Basic validation
+      const amountNum = Number(subAmount);
+      if (isNaN(amountNum) || amountNum <= 0) {
+        throw new Error('Please enter a valid amount greater than 0');
+      }
+
       await addSubscription({
-        name: subName,
-        amount: Number(subAmount),
-        nextPaymentDate: subDate,
+        name: subName.trim(),
+        amount: amountNum,
+        nextPaymentDate: subDate, // Expected YYYY-MM-DD
         icon: subIcon,
         color: subColor,
-        category: subCategory,
+        category: subTag,
         billingCycle: subBillingCycle,
       });
       setShowForm(false);
       setSubName(''); setSubAmount(''); setSubDate(''); setSubBillingCycle('monthly');
-    } catch (err) {
-      console.error('Failed to add subscription:', err);
+      setSubTag('Entertainment');
+    } catch (err: any) {
+      // Extract detailed error from Supabase if available
+      const message = err.details || err.message || JSON.stringify(err);
+      setSubmitError(message);
+      console.error('Full subscription error:', err);
     } finally {
       setIsSubmitting(false);
     }
@@ -129,9 +141,9 @@ export function Subscriptions() {
                 <NeumorphicInput type="date" value={subDate} onChange={(e: ChangeEvent<HTMLInputElement>) => setSubDate(e.target.value)} />
               </div>
               <div>
-                <label className="block text-[#3D4852] dark:text-[#E2E8F0] mb-2">Category</label>
-                <NeumorphicSelect value={subCategory} onChange={(e: ChangeEvent<HTMLSelectElement>) => setSubCategory(e.target.value)}>
-                  {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                <label className="block text-[#3D4852] dark:text-[#E2E8F0] mb-2">Classification Tag</label>
+                <NeumorphicSelect value={subTag} onChange={(e: ChangeEvent<HTMLSelectElement>) => setSubTag(e.target.value)}>
+                  {SUBSCRIPTION_TAGS.map(c => <option key={c} value={c}>{c}</option>)}
                 </NeumorphicSelect>
               </div>
               <div>
@@ -161,6 +173,14 @@ export function Subscriptions() {
                 </div>
               </div>
             </div>
+
+            {submitError && (
+              <div className="mt-6 p-4 rounded-2xl bg-[#FF6B6B]/10 border border-[#FF6B6B]/20 text-[#FF6B6B] flex items-center gap-3">
+                <AlertCircle size={20} />
+                <p>{submitError}</p>
+              </div>
+            )}
+
             <div className="flex gap-4 mt-6">
               <NeumorphicButton onClick={() => setShowForm(false)}>Cancel</NeumorphicButton>
               <NeumorphicButton variant="primary" onClick={handleSubmit} disabled={isSubmitting}>
@@ -259,9 +279,9 @@ export function Subscriptions() {
           <NeumorphicCard className="p-6">
             <h3 className="text-[#3D4852] dark:text-[#E2E8F0] text-xl mb-6">By Category</h3>
             <div className="space-y-4">
-              {byCategory.length === 0 ? (
+              {byTag.length === 0 ? (
                 <p className="text-center text-[#8B92A0] dark:text-[#8892A0] py-8">No data</p>
-              ) : byCategory.map(cat => {
+              ) : byTag.map(cat => {
                 const percentage = totalMonthly > 0 ? (cat.amount / totalMonthly) * 100 : 0;
                 return (
                   <div key={cat.name}>
