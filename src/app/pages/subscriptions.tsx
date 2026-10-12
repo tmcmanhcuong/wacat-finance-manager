@@ -1,5 +1,5 @@
 import { useState, useMemo, ChangeEvent } from 'react';
-import { Music, Tv, MessageSquare, Palette, Calendar, AlertCircle, Plus, DollarSign, Loader2, Trash2, type LucideIcon } from 'lucide-react';
+import { Music, Tv, MessageSquare, Palette, Calendar, AlertCircle, Plus, DollarSign, Loader2, Trash2, Pencil, type LucideIcon } from 'lucide-react';
 import { NeumorphicCard, NeumorphicButton, NeumorphicInput, NeumorphicSelect } from '../components/neumorphic-card';
 import { formatCurrency, daysUntil } from '../store';
 import { useSubscriptions } from '../../hooks/useSubscriptions';
@@ -20,9 +20,10 @@ const COLOR_OPTIONS = [
 const SUBSCRIPTION_TAGS = ['Entertainment', 'Productivity', 'Work', 'Health', 'Education', 'Other'];
 
 export function Subscriptions() {
-  const { subscriptions, loading, addSubscription, deleteSubscription } = useSubscriptions();
+  const { subscriptions, loading, addSubscription, deleteSubscription, updateSubscription } = useSubscriptions();
 
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [subName, setSubName] = useState('');
   const [subAmount, setSubAmount] = useState('');
   const [subDate, setSubDate] = useState('');
@@ -64,6 +65,37 @@ export function Subscriptions() {
     return months.map(month => ({ month, amount: totalMonthly }));
   }, [totalMonthly]);
 
+  const resetForm = () => {
+    setSubName(''); setSubAmount(''); setSubDate(''); setSubBillingCycle('monthly');
+    setSubTag('Entertainment'); setSubIcon('Music'); setSubColor('#6C63FF');
+    setEditingId(null); setSubmitError(null);
+  };
+
+  const handleCloseForm = () => {
+    setShowForm(false);
+    resetForm();
+  };
+
+  const handleOpenAdd = () => {
+    resetForm();
+    setShowForm(true);
+  };
+
+  const handleOpenEdit = (id: string) => {
+    const sub = subscriptions.find(s => s.id === id);
+    if (!sub) return;
+    setEditingId(sub.id);
+    setSubName(sub.name);
+    setSubAmount(String(sub.amount));
+    setSubDate(sub.nextPaymentDate);
+    setSubIcon(sub.icon);
+    setSubColor(sub.color);
+    setSubTag(sub.category);
+    setSubBillingCycle(sub.billingCycle);
+    setSubmitError(null);
+    setShowForm(true);
+  };
+
   const handleSubmit = async () => {
     if (!subName || !subAmount || !subDate) return;
     setIsSubmitting(true);
@@ -75,7 +107,7 @@ export function Subscriptions() {
         throw new Error('Please enter a valid amount greater than 0');
       }
 
-      await addSubscription({
+      const payload = {
         name: subName.trim(),
         amount: amountNum,
         nextPaymentDate: subDate, // Expected YYYY-MM-DD
@@ -83,10 +115,15 @@ export function Subscriptions() {
         color: subColor,
         category: subTag,
         billingCycle: subBillingCycle,
-      });
+      };
+
+      if (editingId) {
+        await updateSubscription(editingId, payload);
+      } else {
+        await addSubscription(payload);
+      }
       setShowForm(false);
-      setSubName(''); setSubAmount(''); setSubDate(''); setSubBillingCycle('monthly');
-      setSubTag('Entertainment');
+      resetForm();
     } catch (err: any) {
       // Extract detailed error from Supabase if available
       const message = err.details || err.message || JSON.stringify(err);
@@ -116,7 +153,7 @@ export function Subscriptions() {
           <h1 className="text-[#3D4852] dark:text-[#E2E8F0] text-3xl mb-2">Premium Subscriptions</h1>
           <p className="text-[#8B92A0] dark:text-[#8892A0]">Track and manage your recurring subscriptions</p>
         </div>
-        <NeumorphicButton variant="primary" onClick={() => setShowForm(!showForm)}>
+        <NeumorphicButton variant="primary" onClick={handleOpenAdd}>
           <Plus size={20} className="inline mr-2" />
           Add Subscription
         </NeumorphicButton>
@@ -126,7 +163,7 @@ export function Subscriptions() {
       {showForm && (
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
           <NeumorphicCard className="p-6">
-            <h3 className="text-[#3D4852] dark:text-[#E2E8F0] text-xl mb-6">New Subscription</h3>
+            <h3 className="text-[#3D4852] dark:text-[#E2E8F0] text-xl mb-6">{editingId ? 'Edit Subscription' : 'New Subscription'}</h3>
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <label className="block text-[#3D4852] dark:text-[#E2E8F0] mb-2">Name</label>
@@ -182,10 +219,10 @@ export function Subscriptions() {
             )}
 
             <div className="flex gap-4 mt-6">
-              <NeumorphicButton onClick={() => setShowForm(false)}>Cancel</NeumorphicButton>
+              <NeumorphicButton onClick={handleCloseForm}>Cancel</NeumorphicButton>
               <NeumorphicButton variant="primary" onClick={handleSubmit} disabled={isSubmitting}>
                 {isSubmitting ? <Loader2 size={16} className="inline animate-spin mr-1" /> : null}
-                Save Subscription
+                {editingId ? 'Save Changes' : 'Save Subscription'}
               </NeumorphicButton>
             </div>
           </NeumorphicCard>
@@ -358,8 +395,16 @@ export function Subscriptions() {
                     <div className="flex gap-3">
                       <div className="flex-1" />
                       <button
+                        onClick={() => handleOpenEdit(subscription.id)}
+                        className="w-10 h-10 rounded-xl bg-[#E0E5EC] dark:bg-[#252C3E] shadow-[3px_3px_6px_rgba(163,177,198,0.4),-3px_-3px_6px_rgba(255,255,255,0.4)] dark:shadow-[3px_3px_6px_rgba(14,18,28,0.9),-3px_-3px_6px_rgba(42,49,68,0.5)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.3),-2px_-2px_4px_rgba(255,255,255,0.3)] hover:dark:shadow-[2px_2px_4px_rgba(14,18,28,0.9),-2px_-2px_4px_rgba(42,49,68,0.5)] flex items-center justify-center transition-all"
+                        title="Edit subscription"
+                      >
+                        <Pencil size={16} className="text-[#6C63FF]" />
+                      </button>
+                      <button
                         onClick={() => deleteSubscription(subscription.id)}
                         className="w-10 h-10 rounded-xl bg-[#E0E5EC] dark:bg-[#252C3E] shadow-[3px_3px_6px_rgba(163,177,198,0.4),-3px_-3px_6px_rgba(255,255,255,0.4)] dark:shadow-[3px_3px_6px_rgba(14,18,28,0.9),-3px_-3px_6px_rgba(42,49,68,0.5)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.3),-2px_-2px_4px_rgba(255,255,255,0.3)] hover:dark:shadow-[2px_2px_4px_rgba(14,18,28,0.9),-2px_-2px_4px_rgba(42,49,68,0.5)] flex items-center justify-center transition-all"
+                        title="Delete subscription"
                       >
                         <Trash2 size={16} className="text-[#FF6B6B]" />
                       </button>

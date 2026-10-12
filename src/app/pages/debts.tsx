@@ -35,7 +35,68 @@ export function Debts() {
   const [payNote, setPayNote] = useState('');
   const [payAccount, setPayAccount] = useState('');
 
-  const { debts, addDebt, markAsReceived, payInstallment } = useDebts();
+  // Edit Debt form state (edit person / description / totalAmount / dueDate)
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [editingDebt, setEditingDebt] = useState<Debt | null>(null);
+  const [editPerson, setEditPerson] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editTotalAmount, setEditTotalAmount] = useState('');
+  const [editDueDate, setEditDueDate] = useState('');
+  const [editSubmitting, setEditSubmitting] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
+
+  const handleOpenEdit = (debt: Debt) => {
+    setEditingDebt(debt);
+    setEditPerson(debt.person);
+    setEditDescription(debt.description ?? '');
+    setEditTotalAmount(String(debt.totalAmount));
+    setEditDueDate(debt.dueDate ?? '');
+    setEditError(null);
+    setShowEditForm(true);
+  };
+
+  const handleCloseEdit = () => {
+    setShowEditForm(false);
+    setEditingDebt(null);
+    setEditError(null);
+  };
+
+  const handleSubmitEdit = async () => {
+    if (!editingDebt) return;
+    const trimmedPerson = editPerson.trim();
+    const totalVal = Number(editTotalAmount);
+
+    if (!trimmedPerson) {
+      setEditError('Person/Store name is required');
+      return;
+    }
+    if (!editTotalAmount || totalVal <= 0) {
+      setEditError('Total amount must be greater than 0');
+      return;
+    }
+    if (totalVal < editingDebt.amount) {
+      setEditError(`Total cannot be less than already paid (${formatCurrency(editingDebt.amount)})`);
+      return;
+    }
+
+    setEditSubmitting(true);
+    setEditError(null);
+    try {
+      await editDebt(editingDebt.id, {
+        person: trimmedPerson,
+        description: editDescription,
+        totalAmount: totalVal,
+        dueDate: editDueDate || undefined,
+      });
+      handleCloseEdit();
+    } catch (err) {
+      setEditError(err instanceof Error ? err.message : 'Failed to update debt');
+    } finally {
+      setEditSubmitting(false);
+    }
+  };
+
+  const { debts, addDebt, markAsReceived, payInstallment, editDebt } = useDebts();
   const { accounts } = useAccounts();
 
   const [isNewUser, setIsNewUser] = useState(false);
@@ -272,12 +333,17 @@ export function Debts() {
                     </div>
                   </div>
 
-                  <NeumorphicButton size="sm" className="w-full" onClick={() => {
-                    setSelectedDebt(debt);
-                    setShowReceiveForm(true);
-                  }}>
-                    Mark as Received
-                  </NeumorphicButton>
+                  <div className="flex gap-3">
+                    <NeumorphicButton size="sm" className="flex-1" onClick={() => {
+                      setSelectedDebt(debt);
+                      setShowReceiveForm(true);
+                    }}>
+                      Mark as Received
+                    </NeumorphicButton>
+                    <NeumorphicButton size="sm" variant="secondary" onClick={() => handleOpenEdit(debt)}>
+                      Edit
+                    </NeumorphicButton>
+                  </div>
                 </div>
               ))}
             </div>
@@ -351,12 +417,17 @@ export function Debts() {
                       </div>
                     </div>
 
-                    <NeumorphicButton size="sm" className="w-full" onClick={() => {
-                      setSelectedBorrowedDebt(debt);
-                      setShowPayForm(true);
-                    }}>
-                      Pay Installment
-                    </NeumorphicButton>
+                    <div className="flex gap-3">
+                      <NeumorphicButton size="sm" className="flex-1" onClick={() => {
+                        setSelectedBorrowedDebt(debt);
+                        setShowPayForm(true);
+                      }}>
+                        Pay Installment
+                      </NeumorphicButton>
+                      <NeumorphicButton size="sm" variant="secondary" onClick={() => handleOpenEdit(debt)}>
+                        Edit
+                      </NeumorphicButton>
+                    </div>
                   </div>
                 );
               })}
@@ -364,6 +435,74 @@ export function Debts() {
           </NeumorphicCard>
         </motion.div>
       </div>
+
+      {/* Edit Debt Modal */}
+      {showEditForm && editingDebt && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 overflow-y-auto flex items-start justify-center pt-8 pb-8 custom-scrollbar"
+          onClick={handleCloseEdit}
+        >
+          <motion.div
+            initial={{ scale: 0.9, y: 20 }}
+            animate={{ scale: 1, y: 0 }}
+            onClick={(e) => e.stopPropagation()}
+            className="max-w-lg w-full mx-4 my-auto relative"
+          >
+            <NeumorphicCard variant="extruded" className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-[#3D4852] dark:text-[#E2E8F0] text-2xl">Edit Debt</h3>
+                <button
+                  onClick={handleCloseEdit}
+                  className="w-10 h-10 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-xl shadow-[4px_4px_8px_rgba(163,177,198,0.4),-4px_-4px_8px_rgba(255,255,255,0.4)] dark:shadow-[4px_4px_8px_rgba(14,18,28,0.9),-4px_-4px_8px_rgba(42,49,68,0.5)] flex items-center justify-center transition-all"
+                >
+                  <X size={20} className="text-[#8B92A0] dark:text-[#8892A0]" />
+                </button>
+              </div>
+
+              {editError && (
+                <div className="mb-4 p-4 bg-[#FF6B6B]/10 rounded-2xl border-2 border-[#FF6B6B]/30 flex items-center gap-3">
+                  <AlertCircle size={20} className="text-[#FF6B6B] shrink-0" />
+                  <p className="text-[#FF6B6B] text-sm font-medium">{editError}</p>
+                </div>
+              )}
+
+              <div className="mb-4">
+                <label className="block text-[#3D4852] dark:text-[#E2E8F0] mb-2">Person / Store</label>
+                <NeumorphicInput value={editPerson} onChange={(e) => setEditPerson(e.target.value)} placeholder="e.g. Credit Card" />
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-[#3D4852] dark:text-[#E2E8F0] mb-2">Description</label>
+                <NeumorphicInput value={editDescription} onChange={(e) => setEditDescription(e.target.value)} placeholder="e.g. iPhone 15 Pro – installments" />
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-[#3D4852] dark:text-[#E2E8F0] mb-2">Total Amount (VND)</label>
+                <NeumorphicInput type="number" value={editTotalAmount} onChange={(e) => setEditTotalAmount(e.target.value)} placeholder="0" />
+                <p className="text-[#8B92A0] dark:text-[#8892A0] text-xs mt-1.5">
+                  Already paid: {formatCurrency(editingDebt.amount)} · Remaining will be recalculated from the new total.
+                </p>
+              </div>
+
+              <div className="mb-6">
+                <label className="block text-[#3D4852] dark:text-[#E2E8F0] mb-2">Due Date</label>
+                <NeumorphicInput type="date" value={editDueDate} onChange={(e) => setEditDueDate(e.target.value)} />
+              </div>
+
+              <div className="flex gap-3">
+                <NeumorphicButton variant="secondary" className="flex-1" onClick={handleCloseEdit} disabled={editSubmitting}>
+                  Cancel
+                </NeumorphicButton>
+                <NeumorphicButton variant="primary" className="flex-1" onClick={handleSubmitEdit} disabled={editSubmitting}>
+                  {editSubmitting ? 'Saving...' : 'Save Changes'}
+                </NeumorphicButton>
+              </div>
+            </NeumorphicCard>
+          </motion.div>
+        </motion.div>
+      )}
 
       {/* Add Debt/Installment Form Modal */}
       {showForm && (

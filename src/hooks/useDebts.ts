@@ -52,6 +52,23 @@ export function useDebts() {
         }
     };
 
+    // Edit a debt's editable details (person, description, dueDate, totalAmount).
+    const editDebt = async (
+        id: string,
+        updates: Partial<Pick<Debt, 'person' | 'description' | 'dueDate' | 'totalAmount'>>
+    ) => {
+        const prevDebts = debts;
+        setDebts(prev => prev.map(d => d.id === id ? { ...d, ...updates } : d));
+
+        try {
+            await debtsService.updateDetails(id, updates);
+        } catch (err) {
+            setDebts(prevDebts);
+            setError(err instanceof Error ? err.message : 'Unknown error');
+            throw err;
+        }
+    };
+
     // Mark as Received (for lent debts)
     const markAsReceived = async (
         debtId: string,
@@ -185,6 +202,7 @@ export function useDebts() {
         refetch: fetchDebts,
         addDebt,
         deleteDebt,
+        editDebt,
         markAsReceived,
         payInstallment,
     };

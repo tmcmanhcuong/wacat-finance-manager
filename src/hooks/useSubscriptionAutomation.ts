@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import { useSubscriptions } from './useSubscriptions';
 import { useTransactions } from './useTransactions';
 import type { Subscription } from '../app/types';
-import { getLocalISODate } from '../app/store';
 
 export function useSubscriptionAutomation() {
   const { subscriptions, updateSubscription } = useSubscriptions();

@@ -66,6 +66,28 @@ export const debtsService = {
         if (error) throw error;
     },
 
+    // Edit the editable details of a debt (person, description, dueDate, totalAmount).
+    // Used when the total owed changes (interest, fees, extra borrowing) or to fix a wrong entry.
+    async updateDetails(
+        id: string,
+        updates: Partial<Pick<Debt, 'person' | 'description' | 'dueDate' | 'totalAmount'>>
+    ): Promise<void> {
+        const payload: Record<string, unknown> = {};
+        if (updates.person !== undefined) payload.person = updates.person;
+        if (updates.description !== undefined) payload.description = updates.description ?? null;
+        if (updates.dueDate !== undefined) payload.due_date = updates.dueDate ?? null;
+        if (updates.totalAmount !== undefined) payload.total_amount = updates.totalAmount;
+
+        if (Object.keys(payload).length === 0) return;
+
+        const { error } = await supabase
+            .from('debts')
+            .update(payload)
+            .eq('id', id);
+
+        if (error) throw error;
+    },
+
     async delete(id: string): Promise<void> {
         const { error } = await supabase
             .from('debts')
