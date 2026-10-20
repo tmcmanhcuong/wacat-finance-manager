@@ -1,6 +1,14 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { NeumorphicCard, NeumorphicButton, NeumorphicSelect } from './neumorphic-card';
+import { Card } from './ui/card';
+import { Button } from './ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './ui/select';
 import { useAccounts } from '../../hooks/useAccounts';
 import { formatCurrency } from '../store';
 import type { Subscription } from '../types';
@@ -58,7 +66,7 @@ export function PaymentConfirmationModal({
             exit={{ scale: 0.9, y: 20 }}
             className="w-full max-w-md"
           >
-            <NeumorphicCard variant="extruded" className="p-6 border-t-4 border-[#FFC75F]">
+            <Card className="p-6 border-t-4 border-t-primary">
               <div className="flex items-center gap-4 mb-6">
                 <div 
                   className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
@@ -67,56 +75,59 @@ export function PaymentConfirmationModal({
                   <IconComponent size={24} />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-[#3D4852] dark:text-[#E2E8F0]">
+                  <h3 className="text-xl font-semibold text-foreground">
                     Payment Due
                   </h3>
-                  <p className="text-[#8B92A0] dark:text-[#8892A0]">{subscription.name}</p>
+                  <p className="text-muted-foreground">{subscription.name}</p>
                 </div>
               </div>
 
               <div className="mb-6 space-y-4">
                 <div>
-                  <p className="text-sm text-[#8B92A0] dark:text-[#8892A0] mb-1">Amount to pay</p>
-                  <p className="text-2xl text-[#3D4852] dark:text-[#E2E8F0]">
+                  <p className="text-sm text-muted-foreground mb-1">Amount to pay</p>
+                  <p className="text-2xl text-foreground">
                     {formatCurrency(subscription.amount)}
                   </p>
                 </div>
                 
                 <div>
-                  <label className="block text-sm text-[#8B92A0] dark:text-[#8892A0] mb-2">
+                  <label className="block text-sm text-muted-foreground mb-2">
                     Select Account for Payment
                   </label>
-                  <NeumorphicSelect 
+                  <Select 
                     value={selectedAccountId} 
-                    onChange={(e) => setSelectedAccountId(e.target.value)}
+                    onValueChange={(val) => setSelectedAccountId(val)}
                   >
-                    <option value="" disabled>Select an account</option>
-                    {accounts.map(acc => (
-                      <option key={acc.id} value={acc.id}>
-                        {acc.name} ({formatCurrency(acc.balance)})
-                      </option>
-                    ))}
-                  </NeumorphicSelect>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select an account" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {accounts.map(acc => (
+                        <SelectItem key={acc.id} value={acc.id}>
+                          {acc.name} ({formatCurrency(acc.balance)})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
               <div className="flex justify-end gap-3 mt-8">
-                <NeumorphicButton 
+                <Button 
                   variant="secondary" 
                   onClick={onClose}
                   disabled={isProcessing}
                 >
                   Cancel
-                </NeumorphicButton>
-                <NeumorphicButton 
-                  variant="primary" 
+                </Button>
+                <Button 
                   onClick={handleConfirm}
                   disabled={!selectedAccountId || isProcessing}
                 >
                   {isProcessing ? 'Confirming...' : 'Confirm Payment'}
-                </NeumorphicButton>
+                </Button>
               </div>
-            </NeumorphicCard>
+            </Card>
           </motion.div>
         </motion.div>
       )}

@@ -1,6 +1,9 @@
 import { useState, useMemo, ChangeEvent } from 'react';
 import { Music, Tv, MessageSquare, Palette, Calendar, AlertCircle, Plus, DollarSign, Loader2, Trash2, Pencil, type LucideIcon } from 'lucide-react';
-import { NeumorphicCard, NeumorphicButton, NeumorphicInput, NeumorphicSelect } from '../components/neumorphic-card';
+import { Card } from '@/app/components/ui/card';
+import { Button } from '@/app/components/ui/button';
+import { Input } from '@/app/components/ui/input';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/app/components/ui/select';
 import { formatCurrency, daysUntil } from '../store';
 import { useSubscriptions } from '../../hooks/useSubscriptions';
 import { motion } from 'motion/react';
@@ -138,8 +141,8 @@ export function Subscriptions() {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 size={40} className="text-[#6C63FF] animate-spin" />
-          <p className="text-[#8B92A0] dark:text-[#8892A0]">Loading subscriptions...</p>
+          <Loader2 size={40} className="text-primary animate-spin" />
+          <p className="text-muted-foreground">Loading subscriptions...</p>
         </div>
       </div>
     );
@@ -150,60 +153,69 @@ export function Subscriptions() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-[#3D4852] dark:text-[#E2E8F0] text-3xl mb-2">Premium Subscriptions</h1>
-          <p className="text-[#8B92A0] dark:text-[#8892A0]">Track and manage your recurring subscriptions</p>
+          <h1 className="text-foreground text-3xl mb-2">Premium Subscriptions</h1>
+          <p className="text-muted-foreground">Track and manage your recurring subscriptions</p>
         </div>
-        <NeumorphicButton variant="primary" onClick={handleOpenAdd}>
+        <Button onClick={handleOpenAdd}>
           <Plus size={20} className="inline mr-2" />
           Add Subscription
-        </NeumorphicButton>
+        </Button>
       </div>
 
       {/* Add Form */}
       {showForm && (
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-          <NeumorphicCard className="p-6">
-            <h3 className="text-[#3D4852] dark:text-[#E2E8F0] text-xl mb-6">{editingId ? 'Edit Subscription' : 'New Subscription'}</h3>
+          <Card className="p-6">
+            <h3 className="text-foreground text-xl mb-6">{editingId ? 'Edit Subscription' : 'New Subscription'}</h3>
             <div className="grid grid-cols-2 gap-6">
               <div>
-                <label className="block text-[#3D4852] dark:text-[#E2E8F0] mb-2">Name</label>
-                <NeumorphicInput type="text" placeholder="Netflix, Spotify..." value={subName} onChange={(e: ChangeEvent<HTMLInputElement>) => setSubName(e.target.value)} />
+                <label className="block text-foreground mb-2">Name</label>
+                <Input type="text" placeholder="Netflix, Spotify..." value={subName} onChange={(e: ChangeEvent<HTMLInputElement>) => setSubName(e.target.value)} />
               </div>
               <div>
-                <label className="block text-[#3D4852] dark:text-[#E2E8F0] mb-2">Monthly Amount (VND)</label>
-                <NeumorphicInput type="number" placeholder="0" value={subAmount} onChange={(e: ChangeEvent<HTMLInputElement>) => setSubAmount(e.target.value)} />
+                <label className="block text-foreground mb-2">Monthly Amount (VND)</label>
+                <Input type="number" placeholder="0" value={subAmount} onChange={(e: ChangeEvent<HTMLInputElement>) => setSubAmount(e.target.value)} />
               </div>
               <div>
-                <label className="block text-[#3D4852] dark:text-[#E2E8F0] mb-2">Next Payment Date</label>
-                <NeumorphicInput type="date" value={subDate} onChange={(e: ChangeEvent<HTMLInputElement>) => setSubDate(e.target.value)} />
+                <label className="block text-foreground mb-2">Next Payment Date</label>
+                <Input type="date" value={subDate} onChange={(e: ChangeEvent<HTMLInputElement>) => setSubDate(e.target.value)} />
               </div>
               <div>
-                <label className="block text-[#3D4852] dark:text-[#E2E8F0] mb-2">Classification Tag</label>
-                <NeumorphicSelect value={subTag} onChange={(e: ChangeEvent<HTMLSelectElement>) => setSubTag(e.target.value)}>
-                  {SUBSCRIPTION_TAGS.map(c => <option key={c} value={c}>{c}</option>)}
-                </NeumorphicSelect>
+                <label className="block text-foreground mb-2">Classification Tag</label>
+                <Select value={subTag} onValueChange={(val) => setSubTag(val)}>
+                  <SelectTrigger><SelectValue placeholder="Select tag" /></SelectTrigger>
+                  <SelectContent>
+                    {SUBSCRIPTION_TAGS.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
-                <label className="block text-[#3D4852] dark:text-[#E2E8F0] mb-2">Billing Cycle</label>
-                <NeumorphicSelect value={subBillingCycle} onChange={(e: ChangeEvent<HTMLSelectElement>) => setSubBillingCycle(e.target.value as 'monthly' | 'yearly')}>
-                  <option value="monthly">Monthly</option>
-                  <option value="yearly">Yearly</option>
-                </NeumorphicSelect>
+                <label className="block text-foreground mb-2">Billing Cycle</label>
+                <Select value={subBillingCycle} onValueChange={(val) => setSubBillingCycle(val as 'monthly' | 'yearly')}>
+                  <SelectTrigger><SelectValue placeholder="Select cycle" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="yearly">Yearly</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
-                <label className="block text-[#3D4852] dark:text-[#E2E8F0] mb-2">Icon</label>
-                <NeumorphicSelect value={subIcon} onChange={(e: ChangeEvent<HTMLSelectElement>) => setSubIcon(e.target.value)}>
-                  {ICON_OPTIONS.map(i => <option key={i} value={i}>{i}</option>)}
-                </NeumorphicSelect>
+                <label className="block text-foreground mb-2">Icon</label>
+                <Select value={subIcon} onValueChange={(val) => setSubIcon(val)}>
+                  <SelectTrigger><SelectValue placeholder="Select icon" /></SelectTrigger>
+                  <SelectContent>
+                    {ICON_OPTIONS.map(i => <SelectItem key={i} value={i}>{i}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
-                <label className="block text-[#3D4852] dark:text-[#E2E8F0] mb-2">Color</label>
+                <label className="block text-foreground mb-2">Color</label>
                 <div className="flex gap-3">
                   {COLOR_OPTIONS.map(c => (
                     <button
                       key={c.value}
                       onClick={() => setSubColor(c.value)}
-                      className={`w-10 h-10 rounded-xl transition-all ${subColor === c.value ? 'ring-4 ring-[#6C63FF] ring-offset-2 ring-offset-[#E0E5EC]' : ''}`}
+                      className={`w-10 h-10 rounded-xl transition-all ${subColor === c.value ? 'ring-4 ring-primary ring-offset-2 ring-offset-background' : ''}`}
                       style={{ backgroundColor: c.value }}
                     />
                   ))}
@@ -212,79 +224,79 @@ export function Subscriptions() {
             </div>
 
             {submitError && (
-              <div className="mt-6 p-4 rounded-2xl bg-[#FF6B6B]/10 border border-[#FF6B6B]/20 text-[#FF6B6B] flex items-center gap-3">
+              <div className="mt-6 p-4 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive flex items-center gap-3">
                 <AlertCircle size={20} />
                 <p>{submitError}</p>
               </div>
             )}
 
             <div className="flex gap-4 mt-6">
-              <NeumorphicButton onClick={handleCloseForm}>Cancel</NeumorphicButton>
-              <NeumorphicButton variant="primary" onClick={handleSubmit} disabled={isSubmitting}>
+              <Button variant="secondary" onClick={handleCloseForm}>Cancel</Button>
+              <Button onClick={handleSubmit} disabled={isSubmitting}>
                 {isSubmitting ? <Loader2 size={16} className="inline animate-spin mr-1" /> : null}
                 {editingId ? 'Save Changes' : 'Save Subscription'}
-              </NeumorphicButton>
+              </Button>
             </div>
-          </NeumorphicCard>
+          </Card>
         </motion.div>
       )}
 
       {/* Summary Cards */}
       <div className="grid grid-cols-4 gap-6 mb-8">
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
-          <NeumorphicCard variant="inset" className="p-6">
+          <Card className="p-6">
             <div className="flex items-center gap-3 mb-3">
-              <DollarSign size={24} className="text-[#6C63FF]" />
-              <p className="text-[#8B92A0] dark:text-[#8892A0]">Monthly Total</p>
+              <DollarSign size={24} className="text-primary" />
+              <p className="text-muted-foreground">Monthly Total</p>
             </div>
-            <p className="text-3xl text-[#6C63FF] mb-2">{formatCurrency(totalMonthly)}</p>
-            <p className="text-[#8B92A0] dark:text-[#8892A0] text-sm">{subscriptions.length} active subs</p>
-          </NeumorphicCard>
+            <p className="text-3xl text-primary mb-2">{formatCurrency(totalMonthly)}</p>
+            <p className="text-muted-foreground text-sm">{subscriptions.length} active subs</p>
+          </Card>
         </motion.div>
 
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }}>
-          <NeumorphicCard variant="inset" className="p-6">
+          <Card className="p-6">
             <div className="flex items-center gap-3 mb-3">
               <Calendar size={24} className="text-[#4ECDC4]" />
-              <p className="text-[#8B92A0] dark:text-[#8892A0]">Yearly Total</p>
+              <p className="text-muted-foreground">Yearly Total</p>
             </div>
             <p className="text-3xl text-[#4ECDC4] mb-2">{formatCurrency(totalYearly)}</p>
-            <p className="text-[#8B92A0] dark:text-[#8892A0] text-sm">Annual spending</p>
-          </NeumorphicCard>
+            <p className="text-muted-foreground text-sm">Annual spending</p>
+          </Card>
         </motion.div>
 
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 }}>
-          <NeumorphicCard variant="inset" className="p-6">
+          <Card className="p-6">
             <div className="flex items-center gap-3 mb-3">
               <AlertCircle size={24} className="text-[#FFC75F]" />
-              <p className="text-[#8B92A0] dark:text-[#8892A0]">Next Payment</p>
+              <p className="text-muted-foreground">Next Payment</p>
             </div>
             {nextPayment ? (
               <>
                 <p className="text-3xl text-[#FFC75F] mb-2">{daysUntil(nextPayment.nextPaymentDate)}d</p>
-                <p className="text-[#8B92A0] dark:text-[#8892A0] text-sm">{nextPayment.name}</p>
+                <p className="text-muted-foreground text-sm">{nextPayment.name}</p>
               </>
             ) : (
-              <p className="text-[#8B92A0] dark:text-[#8892A0]">No subscriptions</p>
+              <p className="text-muted-foreground">No subscriptions</p>
             )}
-          </NeumorphicCard>
+          </Card>
         </motion.div>
 
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }}>
-          <NeumorphicCard variant="inset" className="p-6">
+          <Card className="p-6">
             <div className="flex items-center gap-3 mb-3">
               <Tv size={24} className="text-[#FFB6B9]" />
-              <p className="text-[#8B92A0] dark:text-[#8892A0]">Most Expensive</p>
+              <p className="text-muted-foreground">Most Expensive</p>
             </div>
             {mostExpensive ? (
               <>
                 <p className="text-3xl text-[#FFB6B9] mb-2">{formatCurrency(mostExpensive.amount)}</p>
-                <p className="text-[#8B92A0] dark:text-[#8892A0] text-sm">{mostExpensive.name}</p>
+                <p className="text-muted-foreground text-sm">{mostExpensive.name}</p>
               </>
             ) : (
-              <p className="text-[#8B92A0] dark:text-[#8892A0]">—</p>
+              <p className="text-muted-foreground">—</p>
             )}
-          </NeumorphicCard>
+          </Card>
         </motion.div>
       </div>
 
@@ -292,59 +304,59 @@ export function Subscriptions() {
       <div className="grid grid-cols-3 gap-6 mb-8">
         {/* Trend Chart */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="col-span-2">
-          <NeumorphicCard className="p-6">
-            <h3 className="text-[#3D4852] dark:text-[#E2E8F0] text-xl mb-6">Subscription Spending Trend</h3>
-            <div className="bg-[#E0E5EC] dark:bg-[#252C3E] p-4 rounded-3xl shadow-[inset_6px_6px_12px_rgba(163,177,198,0.6),inset_-6px_-6px_12px_rgba(255,255,255,0.6)] dark:shadow-[inset_6px_6px_12px_rgba(14,18,28,0.9),inset_-6px_-6px_12px_rgba(42,49,68,0.5)]">
+          <Card className="p-6">
+            <h3 className="text-foreground text-xl mb-6">Subscription Spending Trend</h3>
+            <div className="bg-muted p-4 rounded-xl">
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={monthlyData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(163,177,198,0.3)" />
-                  <XAxis dataKey="month" stroke="#8B92A0" />
-                  <YAxis stroke="#8B92A0" tickFormatter={v => `${(v / 1000000).toFixed(1)}M`} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="month" stroke="var(--muted-foreground)" />
+                  <YAxis stroke="var(--muted-foreground)" tickFormatter={v => `${(v / 1000000).toFixed(1)}M`} />
                   <Tooltip
-                    contentStyle={{ backgroundColor: '#E0E5EC', border: 'none', borderRadius: '16px', boxShadow: '4px 4px 8px rgba(163,177,198,0.6)' }}
+                    contentStyle={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '12px' }}
                     formatter={(v: number) => formatCurrency(v)}
                   />
                   <Bar dataKey="amount" fill="#6C63FF" radius={[8, 8, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
-          </NeumorphicCard>
+          </Card>
         </motion.div>
 
         {/* By Tag */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
-          <NeumorphicCard className="p-6">
-            <h3 className="text-[#3D4852] dark:text-[#E2E8F0] text-xl mb-6">By Tag</h3>
+          <Card className="p-6">
+            <h3 className="text-foreground text-xl mb-6">By Tag</h3>
             <div className="space-y-4">
               {byTag.length === 0 ? (
-                <p className="text-center text-[#8B92A0] dark:text-[#8892A0] py-8">No data</p>
+                <p className="text-center text-muted-foreground py-8">No data</p>
               ) : byTag.map(cat => {
                 const percentage = totalMonthly > 0 ? (cat.amount / totalMonthly) * 100 : 0;
                 return (
                   <div key={cat.name}>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-[#3D4852] dark:text-[#E2E8F0]">{cat.name}</span>
-                      <span className="text-[#8B92A0] dark:text-[#8892A0]">{formatCurrency(cat.amount)}</span>
+                      <span className="text-foreground">{cat.name}</span>
+                      <span className="text-muted-foreground">{formatCurrency(cat.amount)}</span>
                     </div>
-                    <div className="h-2 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-full shadow-[inset_2px_2px_4px_rgba(163,177,198,0.6),inset_-2px_-2px_4px_rgba(255,255,255,0.6)] dark:shadow-[inset_2px_2px_4px_rgba(14,18,28,0.9),inset_-2px_-2px_4px_rgba(42,49,68,0.5)] overflow-hidden">
-                      <div className="h-full rounded-full bg-[#6C63FF]" style={{ width: `${percentage}%` }} />
+                    <div className="h-2 bg-muted rounded-full overflow-hidden">
+                      <div className="h-full rounded-full bg-primary" style={{ width: `${percentage}%` }} />
                     </div>
                   </div>
                 );
               })}
             </div>
-          </NeumorphicCard>
+          </Card>
         </motion.div>
       </div>
 
       {/* Subscription Cards */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
-        <h3 className="text-[#3D4852] dark:text-[#E2E8F0] text-xl mb-6">Active Subscriptions</h3>
+        <h3 className="text-foreground text-xl mb-6">Active Subscriptions</h3>
         {subscriptions.length === 0 ? (
-          <NeumorphicCard className="p-12 text-center">
-            <DollarSign size={48} className="mx-auto mb-4 text-[#8B92A0] dark:text-[#8892A0] opacity-30" />
-            <p className="text-[#8B92A0] dark:text-[#8892A0]">No subscriptions yet. Add your first one!</p>
-          </NeumorphicCard>
+          <Card className="p-12 text-center">
+            <DollarSign size={48} className="mx-auto mb-4 text-muted-foreground opacity-30" />
+            <p className="text-muted-foreground">No subscriptions yet. Add your first one!</p>
+          </Card>
         ) : (
           <div className="grid grid-cols-2 gap-6">
             {subscriptions.map((subscription, index) => {
@@ -358,31 +370,31 @@ export function Subscriptions() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.7 + index * 0.1 }}
                 >
-                  <NeumorphicCard className="p-6 hover:shadow-[6px_6px_12px_rgba(163,177,198,0.5),-6px_-6px_12px_rgba(255,255,255,0.5)] hover:dark:shadow-[6px_6px_12px_rgba(14,18,28,0.9),-6px_-6px_12px_rgba(42,49,68,0.5)] transition-all group">
+                  <Card className="p-6 hover:shadow-sm transition-all group">
                     <div className="flex items-start justify-between mb-6">
                       <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 rounded-2xl shadow-[inset_4px_4px_8px_rgba(163,177,198,0.6),inset_-4px_-4px_8px_rgba(255,255,255,0.6)] dark:shadow-[inset_4px_4px_8px_rgba(14,18,28,0.9),inset_-4px_-4px_8px_rgba(42,49,68,0.5)] flex items-center justify-center bg-[#E0E5EC] dark:bg-[#252C3E]">
+                        <div className="w-16 h-16 rounded-xl flex items-center justify-center bg-muted">
                           <Icon size={32} style={{ color: subscription.color }} />
                         </div>
                         <div>
-                          <p className="text-[#3D4852] dark:text-[#E2E8F0] text-lg mb-1">{subscription.name}</p>
-                          <p className="text-[#8B92A0] dark:text-[#8892A0] text-sm">{subscription.category}</p>
+                          <p className="text-foreground text-lg mb-1">{subscription.name}</p>
+                          <p className="text-muted-foreground text-sm">{subscription.category}</p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-[#3D4852] dark:text-[#E2E8F0] text-2xl mb-1">{formatCurrency(subscription.amount)}</p>
-                        <p className="text-[#8B92A0] dark:text-[#8892A0] text-sm">/{subscription.billingCycle === 'yearly' ? 'year' : 'month'}</p>
+                        <p className="text-foreground text-2xl mb-1">{formatCurrency(subscription.amount)}</p>
+                        <p className="text-muted-foreground text-sm">/{subscription.billingCycle === 'yearly' ? 'year' : 'month'}</p>
                       </div>
                     </div>
 
-                    <div className="bg-[#E0E5EC] dark:bg-[#252C3E] p-4 rounded-2xl shadow-[inset_3px_3px_6px_rgba(163,177,198,0.4),inset_-3px_-3px_6px_rgba(255,255,255,0.4)] dark:shadow-[inset_3px_3px_6px_rgba(14,18,28,0.9),inset_-3px_-3px_6px_rgba(42,49,68,0.5)] mb-4">
+                    <div className="bg-muted p-4 rounded-lg mb-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <Calendar size={18} className="text-[#8B92A0] dark:text-[#8892A0]" />
-                          <span className="text-[#8B92A0] dark:text-[#8892A0]">Next Payment</span>
+                          <Calendar size={18} className="text-muted-foreground" />
+                          <span className="text-muted-foreground">Next Payment</span>
                         </div>
                         <div className="flex items-center gap-3">
-                          <span className="text-[#3D4852] dark:text-[#E2E8F0]">
+                          <span className="text-foreground">
                             {new Date(subscription.nextPaymentDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                           </span>
                           <span className={`px-3 py-1 rounded-full text-xs ${isUpcoming ? 'bg-[#FFC75F] text-white' : 'bg-[#4ECDC4] text-white'}`}>
@@ -394,22 +406,24 @@ export function Subscriptions() {
 
                     <div className="flex gap-3">
                       <div className="flex-1" />
-                      <button
+                      <Button
+                        variant="outline"
+                        size="icon"
                         onClick={() => handleOpenEdit(subscription.id)}
-                        className="w-10 h-10 rounded-xl bg-[#E0E5EC] dark:bg-[#252C3E] shadow-[3px_3px_6px_rgba(163,177,198,0.4),-3px_-3px_6px_rgba(255,255,255,0.4)] dark:shadow-[3px_3px_6px_rgba(14,18,28,0.9),-3px_-3px_6px_rgba(42,49,68,0.5)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.3),-2px_-2px_4px_rgba(255,255,255,0.3)] hover:dark:shadow-[2px_2px_4px_rgba(14,18,28,0.9),-2px_-2px_4px_rgba(42,49,68,0.5)] flex items-center justify-center transition-all"
                         title="Edit subscription"
                       >
-                        <Pencil size={16} className="text-[#6C63FF]" />
-                      </button>
-                      <button
+                        <Pencil size={16} className="text-primary" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
                         onClick={() => deleteSubscription(subscription.id)}
-                        className="w-10 h-10 rounded-xl bg-[#E0E5EC] dark:bg-[#252C3E] shadow-[3px_3px_6px_rgba(163,177,198,0.4),-3px_-3px_6px_rgba(255,255,255,0.4)] dark:shadow-[3px_3px_6px_rgba(14,18,28,0.9),-3px_-3px_6px_rgba(42,49,68,0.5)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.3),-2px_-2px_4px_rgba(255,255,255,0.3)] hover:dark:shadow-[2px_2px_4px_rgba(14,18,28,0.9),-2px_-2px_4px_rgba(42,49,68,0.5)] flex items-center justify-center transition-all"
                         title="Delete subscription"
                       >
-                        <Trash2 size={16} className="text-[#FF6B6B]" />
-                      </button>
+                        <Trash2 size={16} className="text-destructive" />
+                      </Button>
                     </div>
-                  </NeumorphicCard>
+                  </Card>
                 </motion.div>
               );
             })}
@@ -420,27 +434,27 @@ export function Subscriptions() {
       {/* Payment Timeline */}
       {subscriptions.length > 0 && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.2 }} className="mt-8">
-          <NeumorphicCard className="p-6">
-            <h3 className="text-[#3D4852] dark:text-[#E2E8F0] text-xl mb-6">Upcoming Payment Timeline</h3>
+          <Card className="p-6">
+            <h3 className="text-foreground text-xl mb-6">Upcoming Payment Timeline</h3>
             <div className="grid grid-cols-4 gap-4">
               {[...subscriptions]
                 .sort((a, b) => new Date(a.nextPaymentDate).getTime() - new Date(b.nextPaymentDate).getTime())
                 .map((sub, index) => (
-                  <div key={sub.id} className="flex items-center gap-3 bg-[#E0E5EC] dark:bg-[#252C3E] p-4 rounded-2xl shadow-[inset_2px_2px_4px_rgba(163,177,198,0.4),inset_-2px_-2px_4px_rgba(255,255,255,0.4)] dark:shadow-[inset_2px_2px_4px_rgba(14,18,28,0.9),inset_-2px_-2px_4px_rgba(42,49,68,0.5)]">
-                    <div className="w-10 h-10 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-xl shadow-[4px_4px_8px_rgba(163,177,198,0.4),-4px_-4px_8px_rgba(255,255,255,0.4)] dark:shadow-[4px_4px_8px_rgba(14,18,28,0.9),-4px_-4px_8px_rgba(42,49,68,0.5)] flex items-center justify-center flex-shrink-0">
-                      <span className="text-[#6C63FF]">{index + 1}</span>
+                  <div key={sub.id} className="flex items-center gap-3 bg-muted p-4 rounded-lg">
+                    <div className="w-10 h-10 bg-card border rounded-xl flex items-center justify-center flex-shrink-0">
+                      <span className="text-primary">{index + 1}</span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[#3D4852] dark:text-[#E2E8F0] truncate">{sub.name}</p>
-                      <p className="text-[#8B92A0] dark:text-[#8892A0] text-xs">
+                      <p className="text-foreground truncate">{sub.name}</p>
+                      <p className="text-muted-foreground text-xs">
                         {new Date(sub.nextPaymentDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                       </p>
                     </div>
-                    <p className="text-[#6C63FF] text-sm">{formatCurrency(sub.amount)}/{sub.billingCycle === 'yearly' ? 'yr' : 'mo'}</p>
+                    <p className="text-primary text-sm">{formatCurrency(sub.amount)}/{sub.billingCycle === 'yearly' ? 'yr' : 'mo'}</p>
                   </div>
                 ))}
             </div>
-          </NeumorphicCard>
+          </Card>
         </motion.div>
       )}
     </div>

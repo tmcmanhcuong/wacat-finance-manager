@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { motion } from 'motion/react';
 import { Cat, Mail, Lock, Eye, EyeOff, AlertCircle, TrendingUp, TrendingDown, Wallet } from 'lucide-react';
-import { NeumorphicButton, NeumorphicInput } from '../components/neumorphic-card';
+import { Button } from '@/app/components/ui/button';
+import { Input } from '@/app/components/ui/input';
 import { supabase } from '../../lib/supabase';
 
 export function SignIn() {
@@ -93,7 +94,7 @@ export function SignIn() {
     };
 
     return (
-        <div className="min-h-screen bg-[#E0E5EC] dark:bg-[#252C3E] flex items-center justify-center p-6">
+        <div className="min-h-screen bg-background flex items-center justify-center p-6">
             {/* Background decorative elements */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 {/* Top-left blob */}
@@ -101,7 +102,7 @@ export function SignIn() {
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 1.2, ease: 'easeOut' }}
-                    className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-[#6C63FF]/10 blur-3xl"
+                    className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-primary/10 blur-3xl"
                 />
                 {/* Bottom-right blob */}
                 <motion.div
@@ -133,15 +134,15 @@ export function SignIn() {
                         <motion.div
                             whileHover={{ rotate: [0, -10, 10, 0] }}
                             transition={{ duration: 0.5 }}
-                            className="w-16 h-16 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-2xl shadow-[8px_8px_16px_rgba(163,177,198,0.6),-8px_-8px_16px_rgba(255,255,255,0.6)] dark:shadow-[8px_8px_16px_rgba(14,18,28,0.9),-8px_-8px_16px_rgba(42,49,68,0.5)] flex items-center justify-center"
+                            className="w-16 h-16 bg-card rounded-xl border flex items-center justify-center"
                         >
-                            <Cat className="text-[#6C63FF]" size={36} />
+                            <Cat className="text-primary" size={36} />
                         </motion.div>
                         <div>
-                            <h1 className="text-[#3D4852] dark:text-[#E2E8F0] text-4xl font-semibold" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                            <h1 className="text-foreground text-4xl font-semibold" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
                                 WaCat
                             </h1>
-                            <p className="text-[#8B92A0] dark:text-[#8892A0] text-sm" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+                            <p className="text-muted-foreground text-sm" style={{ fontFamily: "'DM Sans', sans-serif" }}>
                                 Finance Manager
                             </p>
                         </div>
@@ -150,13 +151,13 @@ export function SignIn() {
                     {/* Tagline */}
                     <div>
                         <h2
-                            className="text-[#3D4852] dark:text-[#E2E8F0] text-3xl leading-snug mb-3"
+                            className="text-foreground text-3xl leading-snug mb-3"
                             style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                         >
                             Take control of your <br />
-                            <span className="text-[#6C63FF]">financial life</span> 🐱
+                            <span className="text-primary">financial life</span> 🐱
                         </h2>
-                        <p className="text-[#8B92A0] dark:text-[#8892A0] text-base leading-relaxed" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+                        <p className="text-muted-foreground text-base leading-relaxed" style={{ fontFamily: "'DM Sans', sans-serif" }}>
                             Track income, expenses, debts, and subscriptions — all in one beautiful place.
                         </p>
                     </div>
@@ -174,14 +175,14 @@ export function SignIn() {
                             {
                                 icon: Wallet,
                                 color: '#6C63FF',
-                                bg: 'bg-[#6C63FF]/10',
+                                bg: 'bg-primary/10',
                                 title: 'Multi-Account Management',
                                 desc: 'Cash, Bank, E-wallet — all in sync',
                             },
                             {
                                 icon: TrendingDown,
                                 color: '#FF6B6B',
-                                bg: 'bg-[#FF6B6B]/10',
+                                bg: 'bg-destructive/10',
                                 title: 'Debts & Subscriptions',
                                 desc: 'Never miss a payment again',
                             },
@@ -191,7 +192,7 @@ export function SignIn() {
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: 0.2 + index * 0.12 }}
-                                className="flex items-center gap-4 p-4 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-2xl shadow-[4px_4px_8px_rgba(163,177,198,0.4),-4px_-4px_8px_rgba(255,255,255,0.4)] dark:shadow-[4px_4px_8px_rgba(14,18,28,0.9),-4px_-4px_8px_rgba(42,49,68,0.5)]"
+                                className="flex items-center gap-4 p-4 bg-card rounded-xl border"
                             >
                                 <div
                                     className={`w-11 h-11 ${feature.bg} rounded-xl flex items-center justify-center flex-shrink-0`}
@@ -200,13 +201,13 @@ export function SignIn() {
                                 </div>
                                 <div>
                                     <p
-                                        className="text-[#3D4852] dark:text-[#E2E8F0] font-medium text-sm"
+                                        className="text-foreground font-medium text-sm"
                                         style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                                     >
                                         {feature.title}
                                     </p>
                                     <p
-                                        className="text-[#8B92A0] dark:text-[#8892A0] text-xs"
+                                        className="text-muted-foreground text-xs"
                                         style={{ fontFamily: "'DM Sans', sans-serif" }}
                                     >
                                         {feature.desc}
@@ -224,15 +225,15 @@ export function SignIn() {
                     transition={{ duration: 0.7, ease: 'easeOut', delay: 0.1 }}
                     className="w-full max-w-md"
                 >
-                    <div className="bg-[#E0E5EC] dark:bg-[#252C3E] rounded-[32px] shadow-[8px_8px_16px_rgba(163,177,198,0.6),-8px_-8px_16px_rgba(255,255,255,0.6)] dark:shadow-[8px_8px_16px_rgba(14,18,28,0.9),-8px_-8px_16px_rgba(42,49,68,0.5)] p-8">
+                    <div className="bg-card rounded-xl border p-8">
 
                         {/* Mobile Logo (only shows on small screens) */}
                         <div className="flex lg:hidden items-center gap-3 mb-8">
-                            <div className="w-10 h-10 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-xl shadow-[6px_6px_12px_rgba(163,177,198,0.6),-6px_-6px_12px_rgba(255,255,255,0.6)] dark:shadow-[6px_6px_12px_rgba(14,18,28,0.9),-6px_-6px_12px_rgba(42,49,68,0.5)] flex items-center justify-center">
-                                <Cat className="text-[#6C63FF]" size={22} />
+                            <div className="w-10 h-10 bg-card rounded-xl border flex items-center justify-center">
+                                <Cat className="text-primary" size={22} />
                             </div>
                             <span
-                                className="text-[#3D4852] dark:text-[#E2E8F0] text-2xl font-semibold"
+                                className="text-foreground text-2xl font-semibold"
                                 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                             >
                                 WaCat
@@ -242,13 +243,13 @@ export function SignIn() {
                         {/* Header */}
                         <div className="mb-8">
                             <h2
-                                className="text-[#3D4852] dark:text-[#E2E8F0] text-2xl mb-1"
+                                className="text-foreground text-2xl mb-1"
                                 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                             >
                                 {mode === 'signin' ? 'Welcome back! 👋' : 'Create account ✨'}
                             </h2>
                             <p
-                                className="text-[#8B92A0] dark:text-[#8892A0] text-sm"
+                                className="text-muted-foreground text-sm"
                                 style={{ fontFamily: "'DM Sans', sans-serif" }}
                             >
                                 {mode === 'signin'
@@ -258,7 +259,7 @@ export function SignIn() {
                         </div>
 
                         {/* Mode Toggle Tabs */}
-                        <div className="flex gap-2 p-1.5 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-2xl shadow-[inset_4px_4px_8px_rgba(163,177,198,0.5),inset_-4px_-4px_8px_rgba(255,255,255,0.5)] dark:shadow-[inset_4px_4px_8px_rgba(14,18,28,0.9),inset_-4px_-4px_8px_rgba(42,49,68,0.5)] mb-8">
+                        <div className="flex gap-2 p-1.5 bg-muted rounded-xl mb-8">
                             {(['signin', 'signup'] as const).map((m) => (
                                 <button
                                     key={m}
@@ -266,9 +267,9 @@ export function SignIn() {
                                         setMode(m);
                                         setError(null);
                                     }}
-                                    className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all ${mode === m
-                                            ? 'bg-[#6C63FF] text-white shadow-[4px_4px_8px_rgba(108,99,255,0.3)]'
-                                            : 'text-[#8B92A0] dark:text-[#8892A0] hover:text-[#3D4852] hover:dark:text-[#E2E8F0]'
+                                    className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${mode === m
+                                            ? 'bg-primary text-primary-foreground'
+                                            : 'text-muted-foreground hover:text-foreground'
                                         }`}
                                     style={{ fontFamily: "'DM Sans', sans-serif" }}
                                 >
@@ -282,11 +283,11 @@ export function SignIn() {
                             <motion.div
                                 initial={{ opacity: 0, y: -8 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="mb-6 p-4 bg-[#FF6B6B]/10 rounded-2xl border-2 border-[#FF6B6B]/30 flex items-start gap-3"
+                                className="mb-6 p-4 bg-destructive/10 rounded-xl border-2 border-destructive/30 flex items-start gap-3"
                             >
-                                <AlertCircle size={18} className="text-[#FF6B6B] flex-shrink-0 mt-0.5" />
+                                <AlertCircle size={18} className="text-destructive flex-shrink-0 mt-0.5" />
                                 <p
-                                    className="text-[#FF6B6B] text-sm"
+                                    className="text-destructive text-sm"
                                     style={{ fontFamily: "'DM Sans', sans-serif" }}
                                 >
                                     {error}
@@ -299,16 +300,16 @@ export function SignIn() {
                             {/* Email */}
                             <div>
                                 <label
-                                    className="block text-[#3D4852] dark:text-[#E2E8F0] text-sm mb-2 font-medium"
+                                    className="block text-foreground text-sm mb-2 font-medium"
                                     style={{ fontFamily: "'DM Sans', sans-serif" }}
                                 >
                                     Email address
                                 </label>
                                 <div className="relative">
-                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                                        <Mail size={18} className="text-[#8B92A0] dark:text-[#8892A0]" />
+                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none z-10">
+                                        <Mail size={18} className="text-muted-foreground" />
                                     </div>
-                                    <NeumorphicInput
+                                    <Input
                                         type="email"
                                         placeholder="your@email.com"
                                         value={email}
@@ -324,19 +325,19 @@ export function SignIn() {
                             {/* Password */}
                             <div>
                                 <label
-                                    className="block text-[#3D4852] dark:text-[#E2E8F0] text-sm mb-2 font-medium"
+                                    className="block text-foreground text-sm mb-2 font-medium"
                                     style={{ fontFamily: "'DM Sans', sans-serif" }}
                                 >
                                     Password
                                     {mode === 'signup' && (
-                                        <span className="text-[#8B92A0] dark:text-[#8892A0] font-normal ml-2 text-xs">(min. 6 characters)</span>
+                                        <span className="text-muted-foreground font-normal ml-2 text-xs">(min. 6 characters)</span>
                                     )}
                                 </label>
                                 <div className="relative">
-                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                                        <Lock size={18} className="text-[#8B92A0] dark:text-[#8892A0]" />
+                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none z-10">
+                                        <Lock size={18} className="text-muted-foreground" />
                                     </div>
-                                    <NeumorphicInput
+                                    <Input
                                         type={showPassword ? 'text' : 'password'}
                                         placeholder="••••••••"
                                         value={password}
@@ -349,7 +350,7 @@ export function SignIn() {
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword((v) => !v)}
-                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#8B92A0] dark:text-[#8892A0] hover:text-[#3D4852] hover:dark:text-[#E2E8F0] transition-colors"
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                                     >
                                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                     </button>
@@ -361,7 +362,7 @@ export function SignIn() {
                         {mode === 'signin' && (
                             <div className="flex justify-end mt-3 mb-8">
                                 <button
-                                    className="text-[#6C63FF] text-sm hover:underline transition-all"
+                                    className="text-primary text-sm hover:underline transition-all"
                                     style={{ fontFamily: "'DM Sans', sans-serif" }}
                                 >
                                     Forgot password?
@@ -372,8 +373,7 @@ export function SignIn() {
                         {mode === 'signup' && <div className="mb-8" />}
 
                         {/* Submit Button */}
-                        <NeumorphicButton
-                            variant="primary"
+                        <Button
                             size="lg"
                             className="w-full"
                             disabled={isLoading}
@@ -384,22 +384,22 @@ export function SignIn() {
                                     <motion.span
                                         animate={{ rotate: 360 }}
                                         transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                                        className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
+                                        className="inline-block w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full"
                                     />
                                     {mode === 'signin' ? 'Signing in...' : 'Creating account...'}
                                 </span>
                             ) : (
                                 mode === 'signin' ? 'Sign In' : 'Create Account'
                             )}
-                        </NeumorphicButton>
+                        </Button>
 
                         {/* Divider */}
                         <div className="flex items-center gap-4 my-6">
-                            <div className="flex-1 h-px bg-[#CDD2D9]/50" />
-                            <span className="text-[#8B92A0] dark:text-[#8892A0] text-xs" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+                            <div className="flex-1 h-px bg-border" />
+                            <span className="text-muted-foreground text-xs" style={{ fontFamily: "'DM Sans', sans-serif" }}>
                                 or continue with
                             </span>
-                            <div className="flex-1 h-px bg-[#CDD2D9]/50" />
+                            <div className="flex-1 h-px bg-border" />
                         </div>
 
                         {/* Social Login Grid */}
@@ -407,7 +407,7 @@ export function SignIn() {
                             {/* Google Button */}
                             <button
                                 onClick={handleGoogleSignIn}
-                                className="flex items-center justify-center gap-2 py-3 px-4 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-2xl shadow-[6px_6px_12px_rgba(163,177,198,0.6),-6px_-6px_12px_rgba(255,255,255,0.6)] dark:shadow-[6px_6px_12px_rgba(14,18,28,0.9),-6px_-6px_12px_rgba(42,49,68,0.5)] hover:shadow-[4px_4px_8px_rgba(163,177,198,0.4),-4px_-4px_8px_rgba(255,255,255,0.4)] hover:dark:shadow-[4px_4px_8px_rgba(14,18,28,0.9),-4px_-4px_8px_rgba(42,49,68,0.5)] transition-all min-h-[44px]"
+                                className="flex items-center justify-center gap-2 py-3 px-4 bg-card rounded-xl border hover:bg-accent hover:text-accent-foreground transition-all min-h-[44px]"
                             >
                                 <svg width="18" height="18" viewBox="0 0 24 24">
                                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -415,30 +415,30 @@ export function SignIn() {
                                     <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
                                     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                                 </svg>
-                                <span className="text-[#3D4852] dark:text-[#E2E8F0] text-sm font-medium">Google</span>
+                                <span className="text-foreground text-sm font-medium">Google</span>
                             </button>
 
                             {/* Facebook Button */}
                             <button
                                 onClick={handleFacebookSignIn}
-                                className="flex items-center justify-center gap-2 py-3 px-4 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-2xl shadow-[6px_6px_12px_rgba(163,177,198,0.6),-6px_-6px_12px_rgba(255,255,255,0.6)] dark:shadow-[6px_6px_12px_rgba(14,18,28,0.9),-6px_-6px_12px_rgba(42,49,68,0.5)] hover:shadow-[4px_4px_8px_rgba(163,177,198,0.4),-4px_-4px_8px_rgba(255,255,255,0.4)] hover:dark:shadow-[4px_4px_8px_rgba(14,18,28,0.9),-4px_-4px_8px_rgba(42,49,68,0.5)] transition-all min-h-[44px]"
+                                className="flex items-center justify-center gap-2 py-3 px-4 bg-card rounded-xl border hover:bg-accent hover:text-accent-foreground transition-all min-h-[44px]"
                             >
                                 <svg width="20" height="20" viewBox="0 0 24 24">
                                     <path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                                 </svg>
-                                <span className="text-[#3D4852] dark:text-[#E2E8F0] text-sm font-medium">Facebook</span>
+                                <span className="text-foreground text-sm font-medium">Facebook</span>
                             </button>
                         </div>
 
                         {/* Footer note */}
                         <p
-                            className="text-center text-[#8B92A0] dark:text-[#8892A0] text-xs mt-6"
+                            className="text-center text-muted-foreground text-xs mt-6"
                             style={{ fontFamily: "'DM Sans', sans-serif" }}
                         >
                             By continuing, you agree to our{' '}
-                            <span className="text-[#6C63FF] cursor-pointer hover:underline">Terms</span>
+                            <span className="text-primary cursor-pointer hover:underline">Terms</span>
                             {' '}and{' '}
-                            <span className="text-[#6C63FF] cursor-pointer hover:underline">Privacy Policy</span>.
+                            <span className="text-primary cursor-pointer hover:underline">Privacy Policy</span>.
                         </p>
                     </div>
                 </motion.div>

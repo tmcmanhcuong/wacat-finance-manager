@@ -84,6 +84,9 @@ ehthumbs.db
 
 # AI Agents & Instructions
 .agents/
+.claude/
+.kiro/
+agent/
 .gemini/
 .github/
 

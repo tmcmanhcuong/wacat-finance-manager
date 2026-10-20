@@ -1,7 +1,10 @@
 import { useState, useMemo } from 'react';
 import { ArrowLeftRight, TrendingUp, TrendingDown, Plus, Loader2, Trash2, ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { NeumorphicCard, NeumorphicButton, NeumorphicInput, NeumorphicSelect } from '../components/neumorphic-card';
+import { Card } from '@/app/components/ui/card';
+import { Button } from '@/app/components/ui/button';
+import { Input } from '@/app/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/app/components/ui/select';
 import { formatCurrency, getLocalISODate } from '../store';
 import { useAccounts } from '../../hooks/useAccounts';
 import { useTransactions } from '../../hooks/useTransactions';
@@ -168,8 +171,8 @@ export function Transactions() {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 size={40} className="text-[#6C63FF] animate-spin" />
-          <p className="text-[#8B92A0] dark:text-[#8892A0]">Loading transactions...</p>
+          <Loader2 size={40} className="text-primary animate-spin" />
+          <p className="text-muted-foreground">Loading transactions...</p>
         </div>
       </div>
     );
@@ -180,13 +183,13 @@ export function Transactions() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-[#3D4852] dark:text-[#E2E8F0] text-3xl mb-2">Transactions</h1>
-          <p className="text-[#8B92A0] dark:text-[#8892A0]">Manage your income, expenses and transfers</p>
+          <h1 className="text-foreground text-3xl mb-2">Transactions</h1>
+          <p className="text-muted-foreground">Manage your income, expenses and transfers</p>
         </div>
-        <NeumorphicButton variant="primary" onClick={handleToggleForm}>
+        <Button onClick={handleToggleForm}>
           <Plus size={20} className="inline mr-2" />
           New Transaction
-        </NeumorphicButton>
+        </Button>
       </div>
 
       <div className="grid grid-cols-3 gap-6">
@@ -194,25 +197,25 @@ export function Transactions() {
         <div className="col-span-1">
           {showForm && (
             <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-              <NeumorphicCard variant="extruded" className="p-6 sticky top-8">
-                <h3 className="text-[#3D4852] dark:text-[#E2E8F0] text-xl mb-6">Add Transaction</h3>
+              <Card className="p-6 sticky top-8">
+                <h3 className="text-foreground text-xl mb-6">Add Transaction</h3>
 
                 {/* Type Selection */}
                 <div className="grid grid-cols-2 gap-3 mb-6">
                   <button
                     onClick={() => { setTransactionType('income'); setIsInternalTransfer(false); }}
-                    className={`py-4 rounded-2xl transition-all min-h-[56px] ${transactionType === 'income' && !isInternalTransfer
-                        ? 'bg-[#4ECDC4] text-white shadow-[4px_4px_8px_rgba(78,205,196,0.3)]'
-                        : 'bg-[#E0E5EC] dark:bg-[#252C3E] text-[#3D4852] dark:text-[#E2E8F0] shadow-[4px_4px_8px_rgba(163,177,198,0.6),-4px_-4px_8px_rgba(255,255,255,0.6)] dark:shadow-[4px_4px_8px_rgba(14,18,28,0.9),-4px_-4px_8px_rgba(42,49,68,0.5)]'
+                    className={`py-4 rounded-lg transition-all min-h-[56px] ${transactionType === 'income' && !isInternalTransfer
+                        ? 'bg-[#4ECDC4] text-white'
+                        : 'bg-muted text-foreground hover:bg-muted/80'
                       }`}
                   >
                     <TrendingUp size={18} className="inline mr-2" />Income
                   </button>
                   <button
                     onClick={() => { setTransactionType('expense'); setIsInternalTransfer(false); }}
-                    className={`py-4 rounded-2xl transition-all min-h-[56px] ${transactionType === 'expense' && !isInternalTransfer
-                        ? 'bg-[#FF6B6B] text-white shadow-[4px_4px_8px_rgba(255,107,107,0.3)]'
-                        : 'bg-[#E0E5EC] dark:bg-[#252C3E] text-[#3D4852] dark:text-[#E2E8F0] shadow-[4px_4px_8px_rgba(163,177,198,0.6),-4px_-4px_8px_rgba(255,255,255,0.6)] dark:shadow-[4px_4px_8px_rgba(14,18,28,0.9),-4px_-4px_8px_rgba(42,49,68,0.5)]'
+                    className={`py-4 rounded-lg transition-all min-h-[56px] ${transactionType === 'expense' && !isInternalTransfer
+                        ? 'bg-destructive text-white'
+                        : 'bg-muted text-foreground hover:bg-muted/80'
                       }`}
                   >
                     <TrendingDown size={18} className="inline mr-2" />Expense
@@ -220,20 +223,20 @@ export function Transactions() {
                 </div>
 
                 {/* Internal Transfer Toggle */}
-                <div className="mb-6 flex items-center justify-between bg-[#E0E5EC] dark:bg-[#252C3E] p-4 rounded-2xl shadow-[inset_2px_2px_4px_rgba(163,177,198,0.4),inset_-2px_-2px_4px_rgba(255,255,255,0.4)] dark:shadow-[inset_2px_2px_4px_rgba(14,18,28,0.9),inset_-2px_-2px_4px_rgba(42,49,68,0.5)]">
-                  <label className="text-[#3D4852] dark:text-[#E2E8F0]">Internal Transfer</label>
+                <div className="mb-6 flex items-center justify-between bg-muted p-4 rounded-lg">
+                  <label className="text-foreground">Internal Transfer</label>
                   <button
                     onClick={() => setIsInternalTransfer(!isInternalTransfer)}
-                    className={`w-16 h-8 rounded-full transition-all ${isInternalTransfer ? 'bg-[#6C63FF]' : 'bg-[#CDD2D9]'}`}
+                    className={`w-16 h-8 rounded-full transition-all ${isInternalTransfer ? 'bg-primary' : 'bg-input'}`}
                   >
-                    <div className={`w-6 h-6 bg-white rounded-full shadow-[2px_2px_4px_rgba(0,0,0,0.2)] transition-transform ${isInternalTransfer ? 'translate-x-9' : 'translate-x-1'}`} />
+                    <div className={`w-6 h-6 bg-white rounded-full shadow-sm transition-transform ${isInternalTransfer ? 'translate-x-9' : 'translate-x-1'}`} />
                   </button>
                 </div>
 
                 {/* Description */}
                 <div className="mb-4">
-                  <label className="block text-[#3D4852] dark:text-[#E2E8F0] mb-2">Description</label>
-                  <NeumorphicInput
+                  <label className="block text-foreground mb-2">Description</label>
+                  <Input
                     type="text"
                     placeholder={isInternalTransfer ? 'Transfer note...' : transactionType === 'income' ? 'Salary, bonus...' : 'Coffee, groceries...'}
                     value={description}
@@ -243,65 +246,73 @@ export function Transactions() {
 
                 {/* Amount */}
                 <div className="mb-4">
-                  <label className="block text-[#3D4852] dark:text-[#E2E8F0] mb-2">Amount (VND)</label>
-                  <NeumorphicInput type="number" placeholder="0" value={amount} onChange={e => setAmount(e.target.value)} />
+                  <label className="block text-foreground mb-2">Amount (VND)</label>
+                  <Input type="number" placeholder="0" value={amount} onChange={e => setAmount(e.target.value)} />
                 </div>
 
                 {/* Conditional Fields */}
                 {isInternalTransfer ? (
                   <>
                     <div className="mb-4">
-                      <label className="block text-[#3D4852] dark:text-[#E2E8F0] mb-2">From Account</label>
-                      <NeumorphicSelect value={fromAccount} onChange={e => setFromAccount(e.target.value)}>
-                        <option value="">Select account</option>
-                        {accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-                      </NeumorphicSelect>
+                      <label className="block text-foreground mb-2">From Account</label>
+                      <Select value={fromAccount} onValueChange={val => setFromAccount(val)}>
+                        <SelectTrigger className="w-full"><SelectValue placeholder="Select account" /></SelectTrigger>
+                        <SelectContent>
+                          {accounts.map(a => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="mb-4">
-                      <label className="block text-[#3D4852] dark:text-[#E2E8F0] mb-2">To Account</label>
-                      <NeumorphicSelect value={toAccount} onChange={e => setToAccount(e.target.value)}>
-                        <option value="">Select account</option>
-                        {accounts.filter(a => a.id !== fromAccount).map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-                      </NeumorphicSelect>
+                      <label className="block text-foreground mb-2">To Account</label>
+                      <Select value={toAccount} onValueChange={val => setToAccount(val)}>
+                        <SelectTrigger className="w-full"><SelectValue placeholder="Select account" /></SelectTrigger>
+                        <SelectContent>
+                          {accounts.filter(a => a.id !== fromAccount).map(a => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </>
                 ) : (
                   <>
                     <div className="mb-4">
-                      <label className="block text-[#3D4852] dark:text-[#E2E8F0] mb-2">Category</label>
-                      <NeumorphicSelect value={categoryId} onChange={e => setCategoryId(e.target.value)}>
-                        <option value="">Select category</option>
-                        {filteredCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                      </NeumorphicSelect>
+                      <label className="block text-foreground mb-2">Category</label>
+                      <Select value={categoryId} onValueChange={val => setCategoryId(val)}>
+                        <SelectTrigger className="w-full"><SelectValue placeholder="Select category" /></SelectTrigger>
+                        <SelectContent>
+                          {filteredCategories.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="mb-4">
-                      <label className="block text-[#3D4852] dark:text-[#E2E8F0] mb-2">Account</label>
-                      <NeumorphicSelect value={fromAccount} onChange={e => setFromAccount(e.target.value)}>
-                        <option value="">Select account</option>
-                        {accounts.map(a => <option key={a.id} value={a.id}>{a.name} — {formatCurrency(a.balance)}</option>)}
-                      </NeumorphicSelect>
+                      <label className="block text-foreground mb-2">Account</label>
+                      <Select value={fromAccount} onValueChange={val => setFromAccount(val)}>
+                        <SelectTrigger className="w-full"><SelectValue placeholder="Select account" /></SelectTrigger>
+                        <SelectContent>
+                          {accounts.map(a => <SelectItem key={a.id} value={a.id}>{a.name} — {formatCurrency(a.balance)}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </>
                 )}
 
                 {/* Date */}
                 <div className="mb-6">
-                  <label className="block text-[#3D4852] dark:text-[#E2E8F0] mb-2">Date</label>
-                  <NeumorphicInput type="date" value={date} onChange={e => setDate(e.target.value)} />
+                  <label className="block text-foreground mb-2">Date</label>
+                  <Input type="date" value={date} onChange={e => setDate(e.target.value)} />
                 </div>
 
                 {submitError && (
-                  <p className="text-[#FF6B6B] text-sm mb-4 p-3 bg-[#FF6B6B]/10 rounded-xl">{submitError}</p>
+                  <p className="text-destructive text-sm mb-4 p-3 bg-destructive/10 rounded-xl">{submitError}</p>
                 )}
 
                 <div className="grid grid-cols-2 gap-4">
-                  <NeumorphicButton onClick={() => setShowForm(false)}>Cancel</NeumorphicButton>
-                  <NeumorphicButton variant="primary" onClick={handleSubmit} disabled={isSubmitting}>
+                  <Button variant="secondary" onClick={() => setShowForm(false)}>Cancel</Button>
+                  <Button onClick={handleSubmit} disabled={isSubmitting}>
                     {isSubmitting ? <Loader2 size={18} className="inline animate-spin mr-2" /> : null}
                     Save
-                  </NeumorphicButton>
+                  </Button>
                 </div>
-              </NeumorphicCard>
+              </Card>
             </motion.div>
           )}
         </div>
@@ -309,58 +320,70 @@ export function Transactions() {
         {/* Transaction List */}
         <div className={showForm ? 'col-span-2' : 'col-span-3'}>
           {/* Filters */}
-          <NeumorphicCard variant="extruded" className="p-6 mb-6">
+          <Card className="p-6 mb-6">
             <div className="grid grid-cols-5 gap-4">
-              <NeumorphicInput 
+              <Input 
                 placeholder="Search..." 
                 value={filterSearch} 
                 onChange={e => { setFilterSearch(e.target.value); setCurrentPage(1); }} 
               />
 
-              <NeumorphicSelect value={filterType} onChange={e => { setFilterType(e.target.value as 'all' | 'income' | 'expense' | 'transfer'); setCurrentPage(1); }}>
-                <option value="all">All Types</option>
-                <option value="income">Income</option>
-                <option value="expense">Expense</option>
-                <option value="transfer">Transfer</option>
-              </NeumorphicSelect>
+              <Select value={filterType} onValueChange={val => { setFilterType(val as 'all' | 'income' | 'expense' | 'transfer'); setCurrentPage(1); }}>
+                <SelectTrigger className="w-full"><SelectValue placeholder="All Types" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="income">Income</SelectItem>
+                  <SelectItem value="expense">Expense</SelectItem>
+                  <SelectItem value="transfer">Transfer</SelectItem>
+                </SelectContent>
+              </Select>
 
-              <NeumorphicSelect value={filterCategory} onChange={e => { setFilterCategory(e.target.value); setCurrentPage(1); }}>
-                <option value="all">All Categories</option>
-                {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </NeumorphicSelect>
+              <Select value={filterCategory} onValueChange={val => { setFilterCategory(val); setCurrentPage(1); }}>
+                <SelectTrigger className="w-full"><SelectValue placeholder="All Categories" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {categories.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
 
-              <NeumorphicSelect value={filterAccount} onChange={e => { setFilterAccount(e.target.value); setCurrentPage(1); }}>
-                <option value="all">All Accounts</option>
-                {accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-              </NeumorphicSelect>
+              <Select value={filterAccount} onValueChange={val => { setFilterAccount(val); setCurrentPage(1); }}>
+                <SelectTrigger className="w-full"><SelectValue placeholder="All Accounts" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Accounts</SelectItem>
+                  {accounts.map(a => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
 
-              <NeumorphicSelect value={filterPeriod} onChange={e => { setFilterPeriod(e.target.value); setCurrentPage(1); }}>
-                <option value="all">All Time</option>
-                <option value="daily">Today</option>
-                <option value="weekly">This Week</option>
-                <option value="monthly">This Month</option>
-                <option value="yearly">This Year</option>
-                <option value="custom">Custom</option>
-              </NeumorphicSelect>
+              <Select value={filterPeriod} onValueChange={val => { setFilterPeriod(val); setCurrentPage(1); }}>
+                <SelectTrigger className="w-full"><SelectValue placeholder="All Time" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Time</SelectItem>
+                  <SelectItem value="daily">Today</SelectItem>
+                  <SelectItem value="weekly">This Week</SelectItem>
+                  <SelectItem value="monthly">This Month</SelectItem>
+                  <SelectItem value="yearly">This Year</SelectItem>
+                  <SelectItem value="custom">Custom</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             {filterPeriod === 'custom' && (
               <div className="mt-4 flex items-center gap-4">
-                <NeumorphicInput type="date" value={customStartDate} onChange={e => setCustomStartDate(e.target.value)} />
-                <span className="text-[#8B92A0] dark:text-[#8892A0]">→</span>
-                <NeumorphicInput type="date" value={customEndDate} onChange={e => setCustomEndDate(e.target.value)} />
+                <Input type="date" value={customStartDate} onChange={e => setCustomStartDate(e.target.value)} />
+                <span className="text-muted-foreground">→</span>
+                <Input type="date" value={customEndDate} onChange={e => setCustomEndDate(e.target.value)} />
               </div>
             )}
-          </NeumorphicCard>
+          </Card>
 
           {/* Transaction List */}
-          <NeumorphicCard variant="extruded" className="p-6">
+          <Card className="p-6">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-[#3D4852] dark:text-[#E2E8F0] text-xl">Transaction History</h3>
-              <span className="text-[#8B92A0] dark:text-[#8892A0] text-sm">{filteredTransactions.length} transactions</span>
+              <h3 className="text-foreground text-xl">Transaction History</h3>
+              <span className="text-muted-foreground text-sm">{filteredTransactions.length} transactions</span>
             </div>
 
             {currentItems.length === 0 ? (
-              <div className="text-center py-16 text-[#8B92A0] dark:text-[#8892A0]">
+              <div className="text-center py-16 text-muted-foreground">
                 <ArrowLeftRight size={48} className="mx-auto mb-4 opacity-20" />
                 <p>No transactions found</p>
               </div>
@@ -373,20 +396,20 @@ export function Transactions() {
                   const toAcc = accounts.find(a => a.id === transaction.toAccountId);
 
                   return (
-                    <div key={transaction.id} className="flex items-center justify-between py-4 border-b border-[#CDD2D9]/30 dark:border-[#2A3144]/30 last:border-0 hover:bg-[#E0E5EC]/50 hover:dark:bg-[#252C3E]/50 dark:bg-[#252C3E]/50 -mx-2 px-2 rounded-xl transition-all group">
+                    <div key={transaction.id} className="flex items-center justify-between py-4 border-b border-border last:border-0 hover:bg-muted/50 -mx-2 px-2 rounded-xl transition-all group">
                       <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 rounded-2xl shadow-[inset_4px_4px_8px_rgba(163,177,198,0.6),inset_-4px_-4px_8px_rgba(255,255,255,0.6)] dark:shadow-[inset_4px_4px_8px_rgba(14,18,28,0.9),inset_-4px_-4px_8px_rgba(42,49,68,0.5)] flex items-center justify-center bg-[#E0E5EC] dark:bg-[#252C3E]">
+                        <div className="w-14 h-14 rounded-lg flex items-center justify-center bg-muted">
                           {transaction.type === 'income' ? (
                             <TrendingUp size={24} className="text-[#4ECDC4]" />
                           ) : transaction.type === 'transfer' ? (
-                            <ArrowLeftRight size={24} className="text-[#6C63FF]" />
+                            <ArrowLeftRight size={24} className="text-primary" />
                           ) : (
-                            <TrendingDown size={24} className="text-[#FF6B6B]" />
+                            <TrendingDown size={24} className="text-destructive" />
                           )}
                         </div>
                         <div>
-                          <p className="text-[#3D4852] dark:text-[#E2E8F0] mb-1">{transaction.description || 'No description'}</p>
-                          <div className="flex items-center gap-2 text-[#8B92A0] dark:text-[#8892A0] text-sm flex-wrap">
+                          <p className="text-foreground mb-1">{transaction.description || 'No description'}</p>
+                          <div className="flex items-center gap-2 text-muted-foreground text-sm flex-wrap">
                             <span>{cat?.name || transaction.category || '—'}</span>
                             <span>•</span>
                             <span>
@@ -400,14 +423,14 @@ export function Transactions() {
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <p className={`text-xl ${transaction.type === 'income' ? 'text-[#4ECDC4]' : transaction.type === 'transfer' ? 'text-[#6C63FF]' : 'text-[#FF6B6B]'}`}>
+                        <p className={`text-xl ${transaction.type === 'income' ? 'text-[#4ECDC4]' : transaction.type === 'transfer' ? 'text-primary' : 'text-destructive'}`}>
                           {transaction.type === 'income' ? '+' : transaction.type === 'transfer' ? '' : '-'}{formatCurrency(transaction.amount)}
                         </p>
                           <button
                             onClick={() => setDeleteConfirmTarget(transaction)}
-                            className="opacity-0 group-hover:opacity-100 transition-opacity w-8 h-8 rounded-lg bg-[#E0E5EC] dark:bg-[#252C3E] shadow-[2px_2px_4px_rgba(163,177,198,0.4),-2px_-2px_4px_rgba(255,255,255,0.4)] dark:shadow-[2px_2px_4px_rgba(14,18,28,0.9),-2px_-2px_4px_rgba(42,49,68,0.5)] flex items-center justify-center hover:bg-[#FF6B6B]/10"
+                            className="opacity-0 group-hover:opacity-100 transition-opacity w-8 h-8 rounded-lg bg-muted flex items-center justify-center hover:bg-destructive/10"
                           >
-                            <Trash2 size={14} className="text-[#FF6B6B]" />
+                            <Trash2 size={14} className="text-destructive" />
                           </button>
                       </div>
                     </div>
@@ -418,20 +441,16 @@ export function Transactions() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-between mt-6 pt-6 border-t border-[#CDD2D9]/30 dark:border-[#2A3144]/30">
+              <div className="flex items-center justify-between mt-6 pt-6 border-t border-border">
                 {/* Prev Button */}
-                <button
+                <Button
+                  variant="outline"
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className={`flex items-center gap-2 px-5 py-3 rounded-2xl transition-all text-sm font-medium ${
-                    currentPage === 1
-                      ? 'bg-[#E0E5EC] dark:bg-[#252C3E] text-[#CDD2D9] shadow-[inset_2px_2px_4px_rgba(163,177,198,0.4),inset_-2px_-2px_4px_rgba(255,255,255,0.4)] dark:shadow-[inset_2px_2px_4px_rgba(14,18,28,0.9),inset_-2px_-2px_4px_rgba(42,49,68,0.5)] cursor-not-allowed'
-                      : 'bg-[#E0E5EC] dark:bg-[#252C3E] text-[#3D4852] dark:text-[#E2E8F0] shadow-[4px_4px_8px_rgba(163,177,198,0.6),-4px_-4px_8px_rgba(255,255,255,0.6)] dark:shadow-[4px_4px_8px_rgba(14,18,28,0.9),-4px_-4px_8px_rgba(42,49,68,0.5)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.4),-2px_-2px_4px_rgba(255,255,255,0.4)] hover:dark:shadow-[2px_2px_4px_rgba(14,18,28,0.9),-2px_-2px_4px_rgba(42,49,68,0.5)] active:shadow-[inset_2px_2px_4px_rgba(163,177,198,0.4),inset_-2px_-2px_4px_rgba(255,255,255,0.4)] active:dark:shadow-[inset_2px_2px_4px_rgba(14,18,28,0.9),inset_-2px_-2px_4px_rgba(42,49,68,0.5)]'
-                  }`}
                 >
                   <ChevronLeft size={16} />
                   Prev
-                </button>
+                </Button>
 
                 {/* Smart Page Numbers */}
                 <div className="flex items-center gap-2">
@@ -454,37 +473,30 @@ export function Transactions() {
                     }
 
                     return pages.map(p => (
-                      <button
+                      <Button
                         key={p}
+                        variant={currentPage === p ? 'default' : 'outline'}
+                        size="icon"
                         onClick={() => setCurrentPage(p as number)}
-                        className={`w-10 h-10 rounded-xl text-sm font-medium transition-all ${
-                          currentPage === p
-                            ? 'bg-[#6C63FF] text-white shadow-[4px_4px_8px_rgba(108,99,255,0.3),-2px_-2px_4px_rgba(255,255,255,0.2)] dark:shadow-[4px_4px_8px_rgba(108,99,255,0.3),-2px_-2px_4px_rgba(42,49,68,0.5)]'
-                            : 'bg-[#E0E5EC] dark:bg-[#252C3E] text-[#3D4852] dark:text-[#E2E8F0] shadow-[4px_4px_8px_rgba(163,177,198,0.6),-4px_-4px_8px_rgba(255,255,255,0.6)] dark:shadow-[4px_4px_8px_rgba(14,18,28,0.9),-4px_-4px_8px_rgba(42,49,68,0.5)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.4),-2px_-2px_4px_rgba(255,255,255,0.4)] hover:dark:shadow-[2px_2px_4px_rgba(14,18,28,0.9),-2px_-2px_4px_rgba(42,49,68,0.5)]'
-                        }`}
                       >
                         {p}
-                      </button>
+                      </Button>
                     ));
                   })()}
                 </div>
 
                 {/* Next Button */}
-                <button
+                <Button
+                  variant="outline"
                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className={`flex items-center gap-2 px-5 py-3 rounded-2xl transition-all text-sm font-medium ${
-                    currentPage === totalPages
-                      ? 'bg-[#E0E5EC] dark:bg-[#252C3E] text-[#CDD2D9] shadow-[inset_2px_2px_4px_rgba(163,177,198,0.4),inset_-2px_-2px_4px_rgba(255,255,255,0.4)] dark:shadow-[inset_2px_2px_4px_rgba(14,18,28,0.9),inset_-2px_-2px_4px_rgba(42,49,68,0.5)] cursor-not-allowed'
-                      : 'bg-[#E0E5EC] dark:bg-[#252C3E] text-[#3D4852] dark:text-[#E2E8F0] shadow-[4px_4px_8px_rgba(163,177,198,0.6),-4px_-4px_8px_rgba(255,255,255,0.6)] dark:shadow-[4px_4px_8px_rgba(14,18,28,0.9),-4px_-4px_8px_rgba(42,49,68,0.5)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.4),-2px_-2px_4px_rgba(255,255,255,0.4)] hover:dark:shadow-[2px_2px_4px_rgba(14,18,28,0.9),-2px_-2px_4px_rgba(42,49,68,0.5)] active:shadow-[inset_2px_2px_4px_rgba(163,177,198,0.4),inset_-2px_-2px_4px_rgba(255,255,255,0.4)] active:dark:shadow-[inset_2px_2px_4px_rgba(14,18,28,0.9),inset_-2px_-2px_4px_rgba(42,49,68,0.5)]'
-                  }`}
                 >
                   Next
                   <ChevronRight size={16} />
-                </button>
+                </Button>
               </div>
             )}
-          </NeumorphicCard>
+          </Card>
         </div>
       </div>
 
@@ -505,39 +517,39 @@ export function Transactions() {
               onClick={e => e.stopPropagation()}
               className="max-w-sm w-full"
             >
-              <NeumorphicCard variant="extruded" className="p-6">
+              <Card className="p-6">
                 {/* Icon cảnh báo */}
                 <div className="flex justify-center mb-4">
-                  <div className="w-16 h-16 bg-[#FF6B6B]/10 rounded-2xl flex items-center justify-center shadow-[inset_3px_3px_6px_rgba(255,107,107,0.2),inset_-3px_-3px_6px_rgba(255,255,255,0.6)] dark:shadow-[inset_3px_3px_6px_rgba(255,107,107,0.2),inset_-3px_-3px_6px_rgba(42,49,68,0.5)]">
-                    <AlertTriangle size={28} className="text-[#FF6B6B]" />
+                  <div className="w-16 h-16 bg-destructive/10 rounded-lg flex items-center justify-center">
+                    <AlertTriangle size={28} className="text-destructive" />
                   </div>
                 </div>
 
-                <h3 className="text-[#3D4852] dark:text-[#E2E8F0] text-xl text-center mb-2">Delete Transaction?</h3>
-                <p className="text-[#8B92A0] dark:text-[#8892A0] text-sm text-center mb-5">
-                  This action <span className="text-[#FF6B6B] font-medium">cannot be undone</span>. The account balance will be reversed automatically.
+                <h3 className="text-foreground text-xl text-center mb-2">Delete Transaction?</h3>
+                <p className="text-muted-foreground text-sm text-center mb-5">
+                  This action <span className="text-destructive font-medium">cannot be undone</span>. The account balance will be reversed automatically.
                 </p>
 
                 {/* Transaction preview */}
-                <div className="bg-[#E0E5EC] dark:bg-[#252C3E] rounded-2xl p-4 mb-6 shadow-[inset_2px_2px_4px_rgba(163,177,198,0.4),inset_-2px_-2px_4px_rgba(255,255,255,0.4)] dark:shadow-[inset_2px_2px_4px_rgba(14,18,28,0.9),inset_-2px_-2px_4px_rgba(42,49,68,0.5)]">
+                <div className="bg-muted rounded-lg p-4 mb-6">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#E0E5EC] dark:bg-[#252C3E] shadow-[3px_3px_6px_rgba(163,177,198,0.5),-3px_-3px_6px_rgba(255,255,255,0.5)] dark:shadow-[3px_3px_6px_rgba(14,18,28,0.9),-3px_-3px_6px_rgba(42,49,68,0.5)] flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 rounded-lg bg-card border flex items-center justify-center flex-shrink-0">
                       {deleteConfirmTarget.type === 'income' ? (
                         <TrendingUp size={18} className="text-[#4ECDC4]" />
                       ) : deleteConfirmTarget.type === 'transfer' ? (
-                        <ArrowLeftRight size={18} className="text-[#6C63FF]" />
+                        <ArrowLeftRight size={18} className="text-primary" />
                       ) : (
-                        <TrendingDown size={18} className="text-[#FF6B6B]" />
+                        <TrendingDown size={18} className="text-destructive" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[#3D4852] dark:text-[#E2E8F0] font-medium truncate">{deleteConfirmTarget.description || 'No description'}</p>
-                      <p className="text-[#8B92A0] dark:text-[#8892A0] text-xs">{new Date(deleteConfirmTarget.date).toLocaleDateString('vi-VN')}</p>
+                      <p className="text-foreground font-medium truncate">{deleteConfirmTarget.description || 'No description'}</p>
+                      <p className="text-muted-foreground text-xs">{new Date(deleteConfirmTarget.date).toLocaleDateString('vi-VN')}</p>
                     </div>
                     <p className={`font-semibold flex-shrink-0 ${
                       deleteConfirmTarget.type === 'income' ? 'text-[#4ECDC4]'
-                      : deleteConfirmTarget.type === 'transfer' ? 'text-[#6C63FF]'
-                      : 'text-[#FF6B6B]'
+                      : deleteConfirmTarget.type === 'transfer' ? 'text-primary'
+                      : 'text-destructive'
                     }`}>
                       {deleteConfirmTarget.type === 'income' ? '+' : deleteConfirmTarget.type === 'expense' ? '-' : ''}
                       {formatCurrency(deleteConfirmTarget.amount)}
@@ -547,13 +559,15 @@ export function Transactions() {
 
                 {/* Buttons */}
                 <div className="grid grid-cols-2 gap-3">
-                  <NeumorphicButton
+                  <Button
+                    variant="secondary"
                     onClick={() => setDeleteConfirmTarget(null)}
                     disabled={isDeleting}
                   >
                     Cancel
-                  </NeumorphicButton>
-                  <button
+                  </Button>
+                  <Button
+                    variant="destructive"
                     disabled={isDeleting}
                     onClick={async () => {
                       if (!deleteConfirmTarget) return;
@@ -567,7 +581,6 @@ export function Transactions() {
                         setIsDeleting(false);
                       }
                     }}
-                    className="flex items-center justify-center gap-2 py-3 rounded-2xl bg-[#FF6B6B] text-white font-medium shadow-[4px_4px_8px_rgba(255,107,107,0.3)] hover:shadow-[2px_2px_4px_rgba(255,107,107,0.3)] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     {isDeleting ? (
                       <Loader2 size={16} className="animate-spin" />
@@ -575,9 +588,9 @@ export function Transactions() {
                       <Trash2 size={16} />
                     )}
                     {isDeleting ? 'Deleting…' : 'Delete'}
-                  </button>
+                  </Button>
                 </div>
-              </NeumorphicCard>
+              </Card>
             </motion.div>
           </motion.div>
         )}
