@@ -1,6 +1,8 @@
 import { useState, ChangeEvent } from 'react';
 import { Plus, Edit2, Trash2, TrendingUp, TrendingDown, ShoppingCart, Home as HomeIcon, Car, Coffee, Heart, Briefcase, Gift, Smartphone, Zap, Music, Book, Dumbbell, Plane, Loader2, AlertTriangle } from 'lucide-react';
-import { NeumorphicCard, NeumorphicButton, NeumorphicInput } from '../components/neumorphic-card';
+import { Card } from '@/app/components/ui/card';
+import { Button } from '@/app/components/ui/button';
+import { Input } from '@/app/components/ui/input';
 import { useCategories } from '../../hooks/useCategories';
 import { motion } from 'motion/react';
 import type { Category } from '../types';
@@ -118,8 +120,8 @@ export function Categories() {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 size={40} className="text-[#6C63FF] animate-spin" />
-          <p className="text-[#8B92A0] dark:text-[#8892A0]">Loading categories...</p>
+          <Loader2 size={40} className="text-primary animate-spin" />
+          <p className="text-muted-foreground">Loading categories...</p>
         </div>
       </div>
     );
@@ -130,13 +132,13 @@ export function Categories() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-[#3D4852] dark:text-[#E2E8F0] text-3xl mb-2">Categories Management</h1>
-          <p className="text-[#8B92A0] dark:text-[#8892A0]">Create and manage your transaction categories</p>
+          <h1 className="text-foreground text-3xl mb-2">Categories Management</h1>
+          <p className="text-muted-foreground">Create and manage your transaction categories</p>
         </div>
-        <NeumorphicButton variant="primary" onClick={handleToggleForm}>
+        <Button onClick={handleToggleForm}>
           <Plus size={20} className="inline mr-2" />
           New Category
-        </NeumorphicButton>
+        </Button>
       </div>
 
       <div className="grid grid-cols-3 gap-6">
@@ -144,27 +146,27 @@ export function Categories() {
         <div className="col-span-1">
           {showForm && (
             <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="h-full">
-              <NeumorphicCard className="p-0 sticky top-8 flex flex-col max-h-[calc(100vh-4rem)] overflow-hidden">
+              <Card className="p-0 sticky top-8 flex flex-col max-h-[calc(100vh-4rem)] overflow-hidden">
                 {/* Header (Pinned) */}
-                <div className="p-6 pb-2 shrink-0 z-10 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-t-[1.5rem]">
-                  <h3 className="text-[#3D4852] dark:text-[#E2E8F0] text-xl">
+                <div className="p-6 pb-2 shrink-0 z-10 bg-card rounded-t-[1.5rem]">
+                  <h3 className="text-foreground text-xl">
                     {editingId ? 'Edit Category' : 'Add New Category'}
                   </h3>
                 </div>
 
                 {/* Scrollable Form Content */}
-                <div className="p-6 pt-2 overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-[#CDD2D9] dark:scrollbar-thumb-[#4A5568] scrollbar-track-transparent">
+                <div className="p-6 pt-2 overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
                   {/* Type Selection */}
                   <div className="grid grid-cols-2 gap-3 mb-6">
                   <button
                     onClick={() => setCategoryType('income')}
-                    className={`py-4 rounded-2xl transition-all min-h-[56px] ${categoryType === 'income' ? 'bg-[#4ECDC4] text-white' : 'bg-[#E0E5EC] dark:bg-[#252C3E] text-[#3D4852] dark:text-[#E2E8F0] shadow-[4px_4px_8px_rgba(163,177,198,0.6),-4px_-4px_8px_rgba(255,255,255,0.6)] dark:shadow-[4px_4px_8px_rgba(14,18,28,0.9),-4px_-4px_8px_rgba(42,49,68,0.5)]'}`}
+                    className={`py-4 rounded-lg transition-all min-h-[56px] ${categoryType === 'income' ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground'}`}
                   >
                     <TrendingUp size={18} className="inline mr-2" />Income
                   </button>
                   <button
                     onClick={() => setCategoryType('expense')}
-                    className={`py-4 rounded-2xl transition-all min-h-[56px] ${categoryType === 'expense' ? 'bg-[#FF6B6B] text-white' : 'bg-[#E0E5EC] dark:bg-[#252C3E] text-[#3D4852] dark:text-[#E2E8F0] shadow-[4px_4px_8px_rgba(163,177,198,0.6),-4px_-4px_8px_rgba(255,255,255,0.6)] dark:shadow-[4px_4px_8px_rgba(14,18,28,0.9),-4px_-4px_8px_rgba(42,49,68,0.5)]'}`}
+                    className={`py-4 rounded-lg transition-all min-h-[56px] ${categoryType === 'expense' ? 'bg-destructive text-destructive-foreground' : 'bg-muted text-foreground'}`}
                   >
                     <TrendingDown size={18} className="inline mr-2" />Expense
                   </button>
@@ -172,8 +174,8 @@ export function Categories() {
 
                 {/* Name */}
                 <div className="mb-6">
-                  <label className="block text-[#3D4852] dark:text-[#E2E8F0] mb-2">Category Name</label>
-                  <NeumorphicInput
+                  <label className="block text-foreground mb-2">Category Name</label>
+                  <Input
                     type="text"
                     placeholder="e.g., Groceries, Salary..."
                     value={categoryName}
@@ -183,8 +185,8 @@ export function Categories() {
 
                 {/* Icon */}
                 <div className="mb-6">
-                  <label className="block text-[#3D4852] dark:text-[#E2E8F0] mb-3">Select Icon</label>
-                  <div className="bg-[#E0E5EC] dark:bg-[#252C3E] p-4 rounded-2xl shadow-[inset_4px_4px_8px_rgba(163,177,198,0.6),inset_-4px_-4px_8px_rgba(255,255,255,0.6)] dark:shadow-[inset_4px_4px_8px_rgba(14,18,28,0.9),inset_-4px_-4px_8px_rgba(42,49,68,0.5)]">
+                  <label className="block text-foreground mb-3">Select Icon</label>
+                  <div className="bg-muted p-4 rounded-lg">
                     <div className="grid grid-cols-5 gap-3">
                       {availableIcons.map(icon => {
                         const IconComp = icon.component;
@@ -192,9 +194,9 @@ export function Categories() {
                           <button
                             key={icon.name}
                             onClick={() => setSelectedIcon(icon.name)}
-                            className={`w-full aspect-square rounded-xl flex items-center justify-center transition-all ${selectedIcon === icon.name ? 'bg-[#6C63FF] shadow-[4px_4px_8px_rgba(108,99,255,0.4)]' : 'bg-[#E0E5EC] dark:bg-[#252C3E] shadow-[2px_2px_4px_rgba(163,177,198,0.4),-2px_-2px_4px_rgba(255,255,255,0.4)] dark:shadow-[2px_2px_4px_rgba(14,18,28,0.9),-2px_-2px_4px_rgba(42,49,68,0.5)]'}`}
+                            className={`w-full aspect-square rounded-xl flex items-center justify-center transition-all ${selectedIcon === icon.name ? 'bg-primary' : 'bg-muted'}`}
                           >
-                            <IconComp size={20} className={selectedIcon === icon.name ? 'text-white' : 'text-[#8B92A0] dark:text-[#8892A0]'} />
+                            <IconComp size={20} className={selectedIcon === icon.name ? 'text-primary-foreground' : 'text-muted-foreground'} />
                           </button>
                         );
                       })}
@@ -204,14 +206,14 @@ export function Categories() {
 
                 {/* Color */}
                 <div className="mb-6">
-                  <label className="block text-[#3D4852] dark:text-[#E2E8F0] mb-3">Select Color</label>
-                  <div className="bg-[#E0E5EC] dark:bg-[#252C3E] p-4 rounded-2xl shadow-[inset_4px_4px_8px_rgba(163,177,198,0.6),inset_-4px_-4px_8px_rgba(255,255,255,0.6)] dark:shadow-[inset_4px_4px_8px_rgba(14,18,28,0.9),inset_-4px_-4px_8px_rgba(42,49,68,0.5)]">
+                  <label className="block text-foreground mb-3">Select Color</label>
+                  <div className="bg-muted p-4 rounded-lg">
                     <div className="grid grid-cols-5 gap-3">
                       {availableColors.map(color => (
                         <button
                           key={color}
                           onClick={() => setSelectedColor(color)}
-                          className={`w-full aspect-square rounded-xl transition-all ${selectedColor === color ? 'ring-4 ring-[#6C63FF] ring-offset-4 ring-offset-[#E0E5EC]' : 'hover:scale-110'}`}
+                          className={`w-full aspect-square rounded-xl transition-all ${selectedColor === color ? 'ring-2 ring-ring ring-offset-2 ring-offset-background' : 'hover:scale-110'}`}
                           style={{ backgroundColor: color, boxShadow: '3px 3px 6px rgba(0,0,0,0.2)' }}
                         />
                       ))}
@@ -221,15 +223,15 @@ export function Categories() {
 
                 {/* Preview */}
                 <div className="mb-6">
-                  <label className="block text-[#3D4852] dark:text-[#E2E8F0] mb-3">Preview</label>
-                  <div className="bg-[#E0E5EC] dark:bg-[#252C3E] p-6 rounded-2xl shadow-[inset_4px_4px_8px_rgba(163,177,198,0.6),inset_-4px_-4px_8px_rgba(255,255,255,0.6)] dark:shadow-[inset_4px_4px_8px_rgba(14,18,28,0.9),inset_-4px_-4px_8px_rgba(42,49,68,0.5)]">
+                  <label className="block text-foreground mb-3">Preview</label>
+                  <div className="bg-muted p-6 rounded-lg">
                     <div className="flex items-center gap-4">
-                      <div className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-[4px_4px_8px_rgba(163,177,198,0.4),-4px_-4px_8px_rgba(255,255,255,0.4)] dark:shadow-[4px_4px_8px_rgba(14,18,28,0.9),-4px_-4px_8px_rgba(42,49,68,0.5)]" style={{ backgroundColor: selectedColor }}>
+                      <div className="w-16 h-16 rounded-lg flex items-center justify-center" style={{ backgroundColor: selectedColor }}>
                         <SelectedIconComponent size={32} className="text-white" />
                       </div>
                       <div>
-                        <p className="text-[#3D4852] dark:text-[#E2E8F0] text-lg">{categoryName || 'Category Name'}</p>
-                        <p className="text-[#8B92A0] dark:text-[#8892A0] text-sm capitalize">{categoryType}</p>
+                        <p className="text-foreground text-lg">{categoryName || 'Category Name'}</p>
+                        <p className="text-muted-foreground text-sm capitalize">{categoryType}</p>
                       </div>
                     </div>
                   </div>
@@ -237,22 +239,22 @@ export function Categories() {
                 </div>{/* End Scrollable Form Content */}
 
                 {/* Footer (Pinned) */}
-                <div className="p-6 pt-4 shrink-0 z-10 bg-[#E0E5EC] dark:bg-[#252C3E] border-t border-[#CDD2D9]/30 dark:border-[#2A3144]/30 rounded-b-[1.5rem]">
+                <div className="p-6 pt-4 shrink-0 z-10 bg-card border-t border-border rounded-b-[1.5rem]">
                   {submitError && (
-                    <div className="mb-4 flex items-center gap-3 p-3 bg-[#FF6B6B]/10 rounded-xl border border-[#FF6B6B]/20">
-                      <AlertTriangle size={18} className="text-[#FF6B6B] shrink-0" />
-                      <p className="text-[#FF6B6B] text-sm font-medium">{submitError}</p>
+                    <div className="mb-4 flex items-center gap-3 p-3 bg-destructive/10 rounded-xl border border-destructive/20">
+                      <AlertTriangle size={18} className="text-destructive shrink-0" />
+                      <p className="text-destructive text-sm font-medium">{submitError}</p>
                     </div>
                   )}
                   <div className="grid grid-cols-2 gap-4">
-                    <NeumorphicButton onClick={resetForm}>Cancel</NeumorphicButton>
-                    <NeumorphicButton variant="primary" onClick={handleSubmit} disabled={isSubmitting}>
+                    <Button variant="secondary" onClick={resetForm}>Cancel</Button>
+                    <Button onClick={handleSubmit} disabled={isSubmitting}>
                       {isSubmitting ? <Loader2 size={16} className="inline animate-spin mr-1" /> : null}
                       {editingId ? 'Update' : 'Create'}
-                    </NeumorphicButton>
+                    </Button>
                   </div>
                 </div>
-              </NeumorphicCard>
+              </Card>
             </motion.div>
           )}
         </div>
@@ -262,16 +264,16 @@ export function Categories() {
           <div className="space-y-6">
             {/* Income */}
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-              <NeumorphicCard className="p-6">
+              <Card className="p-6">
                 <div className="flex items-center gap-3 mb-6">
-                  <TrendingUp size={24} className="text-[#4ECDC4]" />
-                  <h3 className="text-[#3D4852] dark:text-[#E2E8F0] text-xl">Income Categories</h3>
-                  <span className="ml-auto bg-[#E0E5EC] dark:bg-[#252C3E] px-4 py-2 rounded-full text-sm text-[#8B92A0] dark:text-[#8892A0] shadow-[inset_2px_2px_4px_rgba(163,177,198,0.4),inset_-2px_-2px_4px_rgba(255,255,255,0.4)] dark:shadow-[inset_2px_2px_4px_rgba(14,18,28,0.9),inset_-2px_-2px_4px_rgba(42,49,68,0.5)]">
+                  <TrendingUp size={24} className="text-primary" />
+                  <h3 className="text-foreground text-xl">Income Categories</h3>
+                  <span className="ml-auto bg-muted px-4 py-2 rounded-full text-sm text-muted-foreground">
                     {incomeCategories.length} categories
                   </span>
                 </div>
                 {incomeCategories.length === 0 ? (
-                  <p className="text-center text-[#8B92A0] dark:text-[#8892A0] py-8">No income categories yet</p>
+                  <p className="text-center text-muted-foreground py-8">No income categories yet</p>
                 ) : (
                   <div className="grid grid-cols-2 gap-4">
                     {incomeCategories.map((category, index) => {
@@ -282,25 +284,25 @@ export function Categories() {
                           initial={{ opacity: 0, scale: 0.9 }}
                           animate={{ opacity: 1, scale: 1 }}
                           transition={{ delay: index * 0.05 }}
-                          className="bg-[#E0E5EC] dark:bg-[#252C3E] p-5 rounded-2xl shadow-[inset_2px_2px_4px_rgba(163,177,198,0.3),inset_-2px_-2px_4px_rgba(255,255,255,0.3)] dark:shadow-[inset_2px_2px_4px_rgba(14,18,28,0.9),inset_-2px_-2px_4px_rgba(42,49,68,0.5)] hover:shadow-[inset_3px_3px_6px_rgba(163,177,198,0.4),inset_-3px_-3px_6px_rgba(255,255,255,0.4)] hover:dark:shadow-[inset_3px_3px_6px_rgba(14,18,28,0.9),inset_-3px_-3px_6px_rgba(42,49,68,0.5)] transition-all"
+                          className="bg-muted p-5 rounded-lg transition-all"
                         >
                           <div className="flex items-center gap-4 mb-4">
-                            <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ backgroundColor: category.color }}>
+                            <div className="w-14 h-14 rounded-lg flex items-center justify-center" style={{ backgroundColor: category.color }}>
                               <IconComp size={28} className="text-white" />
                             </div>
                             <div className="flex-1">
-                              <p className="text-[#3D4852] dark:text-[#E2E8F0] text-lg">{category.name}</p>
+                              <p className="text-foreground text-lg">{category.name}</p>
                               {category.isSystem && (
-                                <span className="text-[10px] uppercase tracking-wider font-bold text-[#6C63FF] bg-[#6C63FF]/10 px-2 py-0.5 rounded-full">System</span>
+                                <span className="text-[10px] uppercase tracking-wider font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">System</span>
                               )}
                             </div>
                           </div>
                           {!category.isSystem && (
                             <div className="flex gap-2">
-                              <button onClick={() => handleEdit(category)} className="flex-1 py-3 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-xl shadow-[3px_3px_6px_rgba(163,177,198,0.4),-3px_-3px_6px_rgba(255,255,255,0.4)] dark:shadow-[3px_3px_6px_rgba(14,18,28,0.9),-3px_-3px_6px_rgba(42,49,68,0.5)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.3),-2px_-2px_4px_rgba(255,255,255,0.3)] hover:dark:shadow-[2px_2px_4px_rgba(14,18,28,0.9),-2px_-2px_4px_rgba(42,49,68,0.5)] transition-all flex items-center justify-center gap-2 text-[#6C63FF]">
+                              <button onClick={() => handleEdit(category)} className="flex-1 py-3 bg-muted rounded-md border transition-all flex items-center justify-center gap-2 text-primary">
                                 <Edit2 size={16} /><span className="text-sm">Edit</span>
                               </button>
-                              <button onClick={() => handleDelete(category.id)} className="flex-1 py-3 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-xl shadow-[3px_3px_6px_rgba(163,177,198,0.4),-3px_-3px_6px_rgba(255,255,255,0.4)] dark:shadow-[3px_3px_6px_rgba(14,18,28,0.9),-3px_-3px_6px_rgba(42,49,68,0.5)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.3),-2px_-2px_4px_rgba(255,255,255,0.3)] hover:dark:shadow-[2px_2px_4px_rgba(14,18,28,0.9),-2px_-2px_4px_rgba(42,49,68,0.5)] transition-all flex items-center justify-center gap-2 text-[#FF6B6B]">
+                              <button onClick={() => handleDelete(category.id)} className="flex-1 py-3 bg-muted rounded-md border transition-all flex items-center justify-center gap-2 text-destructive">
                                 <Trash2 size={16} /><span className="text-sm">Delete</span>
                               </button>
                             </div>
@@ -310,21 +312,21 @@ export function Categories() {
                     })}
                   </div>
                 )}
-              </NeumorphicCard>
+              </Card>
             </motion.div>
 
             {/* Expense */}
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-              <NeumorphicCard className="p-6">
+              <Card className="p-6">
                 <div className="flex items-center gap-3 mb-6">
-                  <TrendingDown size={24} className="text-[#FF6B6B]" />
-                  <h3 className="text-[#3D4852] dark:text-[#E2E8F0] text-xl">Expense Categories</h3>
-                  <span className="ml-auto bg-[#E0E5EC] dark:bg-[#252C3E] px-4 py-2 rounded-full text-sm text-[#8B92A0] dark:text-[#8892A0] shadow-[inset_2px_2px_4px_rgba(163,177,198,0.4),inset_-2px_-2px_4px_rgba(255,255,255,0.4)] dark:shadow-[inset_2px_2px_4px_rgba(14,18,28,0.9),inset_-2px_-2px_4px_rgba(42,49,68,0.5)]">
+                  <TrendingDown size={24} className="text-destructive" />
+                  <h3 className="text-foreground text-xl">Expense Categories</h3>
+                  <span className="ml-auto bg-muted px-4 py-2 rounded-full text-sm text-muted-foreground">
                     {expenseCategories.length} categories
                   </span>
                 </div>
                 {expenseCategories.length === 0 ? (
-                  <p className="text-center text-[#8B92A0] dark:text-[#8892A0] py-8">No expense categories yet</p>
+                  <p className="text-center text-muted-foreground py-8">No expense categories yet</p>
                 ) : (
                   <div className="grid grid-cols-2 gap-4">
                     {expenseCategories.map((category, index) => {
@@ -335,25 +337,25 @@ export function Categories() {
                           initial={{ opacity: 0, scale: 0.9 }}
                           animate={{ opacity: 1, scale: 1 }}
                           transition={{ delay: index * 0.05 }}
-                          className="bg-[#E0E5EC] dark:bg-[#252C3E] p-5 rounded-2xl shadow-[inset_2px_2px_4px_rgba(163,177,198,0.3),inset_-2px_-2px_4px_rgba(255,255,255,0.3)] dark:shadow-[inset_2px_2px_4px_rgba(14,18,28,0.9),inset_-2px_-2px_4px_rgba(42,49,68,0.5)] hover:shadow-[inset_3px_3px_6px_rgba(163,177,198,0.4),inset_-3px_-3px_6px_rgba(255,255,255,0.4)] hover:dark:shadow-[inset_3px_3px_6px_rgba(14,18,28,0.9),inset_-3px_-3px_6px_rgba(42,49,68,0.5)] transition-all"
+                          className="bg-muted p-5 rounded-lg transition-all"
                         >
                           <div className="flex items-center gap-4 mb-4">
-                            <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ backgroundColor: category.color }}>
+                            <div className="w-14 h-14 rounded-lg flex items-center justify-center" style={{ backgroundColor: category.color }}>
                               <IconComp size={28} className="text-white" />
                             </div>
                             <div className="flex-1">
-                              <p className="text-[#3D4852] dark:text-[#E2E8F0] text-lg">{category.name}</p>
+                              <p className="text-foreground text-lg">{category.name}</p>
                               {category.isSystem && (
-                                <span className="text-[10px] uppercase tracking-wider font-bold text-[#6C63FF] bg-[#6C63FF]/10 px-2 py-0.5 rounded-full">System</span>
+                                <span className="text-[10px] uppercase tracking-wider font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">System</span>
                               )}
                             </div>
                           </div>
                           {!category.isSystem && (
                             <div className="flex gap-2">
-                              <button onClick={() => handleEdit(category)} className="flex-1 py-3 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-xl shadow-[3px_3px_6px_rgba(163,177,198,0.4),-3px_-3px_6px_rgba(255,255,255,0.4)] dark:shadow-[3px_3px_6px_rgba(14,18,28,0.9),-3px_-3px_6px_rgba(42,49,68,0.5)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.3),-2px_-2px_4px_rgba(255,255,255,0.3)] hover:dark:shadow-[2px_2px_4px_rgba(14,18,28,0.9),-2px_-2px_4px_rgba(42,49,68,0.5)] transition-all flex items-center justify-center gap-2 text-[#6C63FF]">
+                              <button onClick={() => handleEdit(category)} className="flex-1 py-3 bg-muted rounded-md border transition-all flex items-center justify-center gap-2 text-primary">
                                 <Edit2 size={16} /><span className="text-sm">Edit</span>
                               </button>
-                              <button onClick={() => handleDelete(category.id)} className="flex-1 py-3 bg-[#E0E5EC] dark:bg-[#252C3E] rounded-xl shadow-[3px_3px_6px_rgba(163,177,198,0.4),-3px_-3px_6px_rgba(255,255,255,0.4)] dark:shadow-[3px_3px_6px_rgba(14,18,28,0.9),-3px_-3px_6px_rgba(42,49,68,0.5)] hover:shadow-[2px_2px_4px_rgba(163,177,198,0.3),-2px_-2px_4px_rgba(255,255,255,0.3)] hover:dark:shadow-[2px_2px_4px_rgba(14,18,28,0.9),-2px_-2px_4px_rgba(42,49,68,0.5)] transition-all flex items-center justify-center gap-2 text-[#FF6B6B]">
+                              <button onClick={() => handleDelete(category.id)} className="flex-1 py-3 bg-muted rounded-md border transition-all flex items-center justify-center gap-2 text-destructive">
                                 <Trash2 size={16} /><span className="text-sm">Delete</span>
                               </button>
                             </div>
@@ -363,7 +365,7 @@ export function Categories() {
                     })}
                   </div>
                 )}
-              </NeumorphicCard>
+              </Card>
             </motion.div>
           </div>
         </div>
